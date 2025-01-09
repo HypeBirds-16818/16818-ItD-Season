@@ -1,18 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
-@Config
-@TeleOp
-public class PID_Test extends OpMode {
+public class Climber {
     private PIDController controller;
 
     public static double p = 0.004, i = 0, d = 0.0001;
@@ -27,27 +21,25 @@ public class PID_Test extends OpMode {
     private DcMotorEx motor2;
     private DcMotorEx piston;
 
-    @Override
-    public void init() {
-        controller = new PIDController(p,i,d);
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
+    public Climber(HardwareMap hardwareMap){
         motor1 = hardwareMap.get(DcMotorEx.class, "motor1");
         motor2 = hardwareMap.get(DcMotorEx.class, "motor2");
         piston = hardwareMap.get(DcMotorEx.class, "piston");
-
         motor2.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-
-        motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
     }
 
-    @Override
-    public void loop() {
+    public void init(){
+        controller = new PIDController(p,i,d);
+        setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void setMotorMode(DcMotor.RunMode runMode){
+        motor1.setMode(runMode);
+        motor2.setMode(runMode);
+    }
+
+    public void updatePID(){
         controller.setPID(p,i,d);
         int motor1pos = motor1.getCurrentPosition();
         int motor2pos = motor2.getCurrentPosition();
@@ -60,25 +52,13 @@ public class PID_Test extends OpMode {
 
         motor1.setPower(power);
         motor2.setPower(power);
+    }
 
-        if (gamepad1.right_bumper){
-            pistonpw = 0.5;
-        }
-        if (gamepad1.left_bumper){
-            pistonpw = -0.5;
-        }
-        if (gamepad1.a){
-            pistonpw = 0;
-        }
-        piston.setPower(pistonpw);
+    public void setTarget(int newTarget){
+        target = newTarget;
+    }
 
-        telemetry.addData("pos 1", motor1pos);
-        telemetry.addData("pos 2", motor1pos);
-        telemetry.addData("pos avg", slidepos);
-        telemetry.addData("target ", target);
-        telemetry.update();
-
-
-
+    public void setPistonSpeed(double speed){
+        piston.setPower(speed);
     }
 }
