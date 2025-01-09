@@ -1,12 +1,16 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.robot.Robot;
 
 import org.firstinspires.ftc.teamcode.Climber;
 import org.firstinspires.ftc.teamcode.Intake;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Outtake;
 
 @Config
@@ -62,6 +66,7 @@ public class TeleOp extends LinearOpMode {
         Intake intake = new Intake(hardwareMap);
         Outtake outake = new Outtake(hardwareMap);
         Climber climber = new Climber(hardwareMap);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0, 0));
 
         waitForStart();
         intake.init();
@@ -71,6 +76,13 @@ public class TeleOp extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive() && !isStopRequested()) {
+
+            drive.setDrivePowers(
+                    new PoseVelocity2d(
+                            new Vector2d(-gamepad1.left_stick_y, -gamepad1.left_stick_x), -gamepad1.right_stick_x
+                    )
+            );
+
             switch(robotState){
                 case IDLE:
                     // cerrar garra del outake
