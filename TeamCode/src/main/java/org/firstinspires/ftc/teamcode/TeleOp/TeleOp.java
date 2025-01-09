@@ -287,6 +287,10 @@ public class TeleOp extends LinearOpMode {
                     break;
             }
 
+            drive.updatePoseEstimate();
+            intake.updatePID();
+            climber.updatePID();
+
         }
     }
 }
