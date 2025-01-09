@@ -12,6 +12,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 public class Intake {
     public Servo rotationIntake;
     public Servo garraIntake;
+    public Servo brazoIntake;
 
     public DcMotorEx poleasIntake;
     public PIDController controller;
@@ -23,6 +24,7 @@ public class Intake {
 
     public Intake(HardwareMap hardwareMap){
         rotationIntake = hardwareMap.get(Servo.class, "rotationIntake");
+        brazoIntake = hardwareMap.get(Servo.class, "brazoIntake");
         garraIntake = hardwareMap.get(Servo.class, "garraIntake");
         poleasIntake = hardwareMap.get(DcMotorEx.class, "intake");
 
@@ -57,6 +59,10 @@ public class Intake {
 
     public void setRotation(double position){
         rotationIntake.setPosition(position);
+    }
+
+    public void setBrazo(double position){
+        brazoIntake.setPosition(position);
     }
 
     public void openGarra(){
