@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.robot.Robot;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Climber;
 import org.firstinspires.ftc.teamcode.Intake;
@@ -67,6 +68,7 @@ public class TeleOp extends LinearOpMode {
         Outtake outake = new Outtake(hardwareMap);
         Climber climber = new Climber(hardwareMap);
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0, 0));
+        ElapsedTime timer = new ElapsedTime();
 
         waitForStart();
         intake.init();
@@ -104,11 +106,15 @@ public class TeleOp extends LinearOpMode {
                 case INTAKING:
                     // extender sliders para intakear
                     intake.setTarget(SLIDER_I_OUT);
+                    timer.reset();
                     // abrir garra
                     intake.openGarra();
-                    // poner servo viendo para abajo
-                    intake.setBrazo(BRAZO_IN_CIENTOCHENTA);
-                    intake.setRotation(ROT_IN_NOVENTA);
+
+                    if(timer.seconds() > 1){
+                        // poner servo viendo para abajo
+                        intake.setBrazo(BRAZO_IN_CIENTOCHENTA);
+                        intake.setRotation(ROT_IN_NOVENTA);
+                    }
 
                     if(gamepad1.a){
                         robotState = RobotState.CLOSE_INTAKE;
@@ -134,17 +140,29 @@ public class TeleOp extends LinearOpMode {
                 case TRANSFER:
                     // retrae slider
                     intake.setTarget(SLIDER_I_IN);
-                    // gira intake
-                    intake.setRotation(ROT_IN_CERO);
-                    // gira brazo intake
-                    intake.setBrazo(BRAZO_IN_CERO);
-                    // pone outake en posicion
-                    outake.setBrazo(BRAZO_OUT_ABAJO);
-                    outake.setRotation(ROT_OUT_CERO);
-                    // cierra outake
-                    outake.closeGarra();
-                    // abre intake
-                    intake.openGarra();
+                    timer.reset();
+
+                    if(timer.seconds() > 1){
+                        // gira intake
+                        intake.setRotation(ROT_IN_CERO);
+                        // gira brazo intake
+                        intake.setBrazo(BRAZO_IN_CERO);
+                    }
+
+                    if(timer.seconds() > 3){
+                        // pone outake en posicion
+                        outake.setBrazo(BRAZO_OUT_ABAJO);
+                        outake.setRotation(ROT_OUT_CERO);
+                    }
+                    if(timer.seconds() > 4){
+                        // cierra outake
+                        outake.closeGarra();
+                    }
+                    if(timer.seconds() > 5){
+                        // abre intake
+                        intake.openGarra();
+                    }
+
 
                     if(gamepad2.a){
                         robotState = RobotState.OUTAKING;
@@ -156,10 +174,18 @@ public class TeleOp extends LinearOpMode {
                     climber.setTarget(CLIMBER_ABAJO);
                     // levanza el brazo el outake
                     outake.setBrazo(BRAZO_OUT_MEDIO);
-                    // da la vuelta al outake 270°
-                    outake.setRotation(ROT_OUT_CIENTOCHENTA);
-                    // levanta totalmente el brazo del outake
-                    outake.setBrazo(BRAZO_OUT_ARRIBA);
+                    timer.reset();
+
+                    if(timer.seconds() > 1){
+                        // da la vuelta al outake 270°
+                        outake.setRotation(ROT_OUT_CIENTOCHENTA);
+                    }
+
+                    if(timer.seconds() > 3){
+                        // levanta totalmente el brazo del outake
+                        outake.setBrazo(BRAZO_OUT_ARRIBA);
+                    }
+
                     // EN PARALELO
                     // regresa la posicion del intake a la de IDLE
 
@@ -210,10 +236,14 @@ public class TeleOp extends LinearOpMode {
                 case SPECIMING:
                     // levantar levemente el climber
                     climber.setTarget(CLIMBER_SLIGHTLY);
-                    // rotar 180° el brazo del outake
-                    outake.setBrazo(BRAZO_OUT_ATRAS);
-                    // abrir garra
-                    outake.openGarra();
+                    timer.reset();
+
+                    if(timer.seconds() > 1){
+                        // rotar 180° el brazo del outake
+                        outake.setBrazo(BRAZO_OUT_ATRAS);
+                        // abrir garra
+                        outake.openGarra();
+                    }
 
                     if(gamepad1.x){
                         robotState = RobotState.CLOSE_S;
@@ -238,8 +268,12 @@ public class TeleOp extends LinearOpMode {
                 case OUTAKING_S:
                     // levanta un poquito el climber
                     climber.setTarget(CLIMBER_SLIGHTLY);
-                    // rota 180° el outake
-                    outake.setRotation(ROT_OUT_CIENTOCHENTA);
+                    timer.reset();
+
+                    if(timer.seconds() > 1){
+                        // rota 180° el outake
+                        outake.setRotation(ROT_OUT_CIENTOCHENTA);
+                    }
 
                     if(gamepad2.right_bumper){
                         robotState = RobotState.RAISE_S;
@@ -259,12 +293,17 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case DROPPING_S:
+                    timer.reset();
                     // baja levemente el slider
                     climber.setTarget(CLIMBER_RUNG-300);
                     // abre la garra
-                    outake.openGarra();
-                    // baja el climber a ligeramente arriba de 0
-                    climber.setTarget(CLIMBER_SLIGHTLY);
+
+                    if(timer.seconds() > 1){
+                        outake.openGarra();
+                        // baja el climber a ligeramente arriba de 0
+                        climber.setTarget(CLIMBER_SLIGHTLY);
+                    }
+
                     // EN PARALELO
                     // regresa el intake a posicion de IDLE
 
@@ -277,13 +316,21 @@ public class TeleOp extends LinearOpMode {
                 case RESET_OUTAKE:
                     // climber ligeramente arriba de 0
                     climber.setTarget(CLIMBER_SLIGHTLY);
-                    // brazo de outtake recto
-                    outake.setBrazo(BRAZO_OUT_MEDIO);
-                    // gira 180° el outake
-                    outake.setRotation(ROT_OUT_CERO);
-                    // brazo de outake default
+                    timer.reset();
 
-                    robotState = RobotState.IDLE;
+                    if(timer.seconds() > 1){
+                        // brazo de outtake recto
+                        outake.setBrazo(BRAZO_OUT_MEDIO);
+                    }
+                    if(timer.seconds() > 2){
+                        // gira 180° el outake
+                        outake.setRotation(ROT_OUT_CERO);
+                    }
+
+                    // brazo de outake default
+                    if(timer.seconds() > 3){
+                        robotState = RobotState.IDLE;
+                    }
                     break;
             }
 
