@@ -13,6 +13,7 @@ public class Intake {
     public Servo rotationIntake;
     public Servo garraIntake;
     public Servo brazoIntake;
+    public Servo munecaIntake;
 
     public DcMotorEx poleasIntake;
     public PIDController controller;
@@ -27,6 +28,7 @@ public class Intake {
         brazoIntake = hardwareMap.get(Servo.class, "brazoIntake");
         garraIntake = hardwareMap.get(Servo.class, "garraIntake");
         poleasIntake = hardwareMap.get(DcMotorEx.class, "intake");
+        munecaIntake = hardwareMap.get(Servo.class, "munecaIntake");
 
     }
 
@@ -34,6 +36,7 @@ public class Intake {
         controller = new PIDController(p,i,d);
         rotationIntake.setPosition(1);
         garraIntake.setPosition(1);
+        munecaIntake.setPosition(1);
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
@@ -72,5 +75,7 @@ public class Intake {
     public void closeGarra(){
         garraIntake.setPosition(0);
     }
+
+    public void setMuneca(double position){ munecaIntake.setPosition(position);}
 
 }
