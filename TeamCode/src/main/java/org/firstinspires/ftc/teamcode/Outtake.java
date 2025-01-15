@@ -28,11 +28,8 @@ public class Outtake {
         brazoOuttake.setPosition(position);
     }
 
-    public void openGarra(){
-        garraOuttake.setPosition(1);
+    public void setGarra(double position){
+        garraOuttake.setPosition(position);
     }
 
-    public void closeGarra(){
-        garraOuttake.setPosition(0);
-    }
 }

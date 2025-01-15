@@ -40,14 +40,14 @@ public class Climber {
         motor2.setMode(runMode);
     }
 
-    public void updatePID(){
+    public void updatePID(int Ttarget){
         controller.setPID(p,i,d);
         int motor1pos = motor1.getCurrentPosition();
         int motor2pos = motor2.getCurrentPosition();
 
         slidepos = (motor1pos + motor2pos)/2;
 
-        double pid = controller.calculate(slidepos, target);
+        double pid = controller.calculate(slidepos, Ttarget);
         double ff = Math.cos(Math.toRadians(target / ticks_per_degree)) * f;
         double power = pid + ff;
 

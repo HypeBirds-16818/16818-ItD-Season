@@ -160,8 +160,8 @@ public class Test_Servos extends LinearOpMode {
             telemetry.update();
 
             drive.updatePoseEstimate();
-            intake.updatePID();
-            climber.updatePID();
+//            intake.updatePID();
+//            climber.updatePID();
 
         }
     }
