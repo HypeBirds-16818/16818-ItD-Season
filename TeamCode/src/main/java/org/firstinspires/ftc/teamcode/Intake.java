@@ -45,13 +45,12 @@ public class Intake {
         poleasIntake.setMode(runMode);
     }
 
-    public void updatePID(){
+    public void updatePID(int Ttarget){
         controller.setPID(p,i,d);
         int intakePos = poleasIntake.getCurrentPosition();
 
-        double pid = controller.calculate(intakePos, target);
-        double ff = Math.cos(Math.toRadians(target / ticks_per_degree)) * f;
-        double power = pid + ff;
+        double pid = controller.calculate(intakePos, Ttarget);
+        double power = pid;
 
         poleasIntake.setPower(power);
     }
@@ -68,13 +67,11 @@ public class Intake {
         brazoIntake.setPosition(position);
     }
 
-    public void openGarra(){
-        garraIntake.setPosition(1);
+    public void setGarra(double position){
+        garraIntake.setPosition(position);
     }
 
-    public void closeGarra(){
-        garraIntake.setPosition(0);
-    }
+
 
     public void setMuneca(double position){ munecaIntake.setPosition(position);}
 
