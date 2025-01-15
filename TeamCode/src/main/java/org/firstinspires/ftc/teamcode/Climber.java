@@ -15,6 +15,7 @@ public class Climber {
     public static int target = 0;
 
     public double pistonpw = 0;
+    public int slidepos;
     private final double ticks_per_degree = 537.7/180;
 
     private DcMotorEx motor1;
@@ -44,7 +45,7 @@ public class Climber {
         int motor1pos = motor1.getCurrentPosition();
         int motor2pos = motor2.getCurrentPosition();
 
-        int slidepos = (motor1pos + motor2pos)/2;
+        slidepos = (motor1pos + motor2pos)/2;
 
         double pid = controller.calculate(slidepos, target);
         double ff = Math.cos(Math.toRadians(target / ticks_per_degree)) * f;
@@ -60,5 +61,9 @@ public class Climber {
 
     public void setPistonSpeed(double speed){
         piston.setPower(speed);
+    }
+
+    public int getSlidePos(){
+        return slidepos;
     }
 }

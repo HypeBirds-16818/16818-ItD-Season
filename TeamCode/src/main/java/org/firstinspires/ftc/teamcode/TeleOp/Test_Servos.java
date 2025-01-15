@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -15,36 +17,27 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Outtake;
 
 @Config
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOpToluca")
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Test_Servos")
 public class Test_Servos extends LinearOpMode {
-    public static int targetIntake = 0;
-    public static int targetOutake = 0;
 
-    public enum RobotState{
-        IDLE,
-        INTAKING,
-        CLOSE_INTAKE,
-        TRANSFER,
-        OUTAKING,
-        RAISE1,
-        RAISE2,
-        DROPPING,
-        SPECIMING,
-        CLOSE_S,
-        OUTAKING_S,
-        RAISE_S,
-        DROPPING_S,
-        RESET_OUTAKE
-    }
+    public String active = "None";
+    public int in_gar = 0;
+    public int in_rot = 0;
+    public int in_brazo = 0;
+    public int in_mun = 0;
+    public int out_brazo = 0;
+    public int out_rot = 0;
+    public int out_garra = 0;
 
-
-    public static int SLIDER_I_OUT = 500;
-    public static double ROT_IN_CERO = 0;
-    public static double ROT_IN_NOVENTA = 0.5;
-    public static double ROT_IN_CIENTOCHENTA = 1;
-    public static double BRAZO_IN_CERO = 0;
-    public static double BRAZO_IN_NOVENTA = 0.5;
-    public static double BRAZO_IN_CIENTOCHENTA = 1;
+    public static int INTAKE_TARGET = 0;
+    public static int OUTTAKE_TARGET = 0;
+    public static double INTAKE_GARRA = 0;
+    public static double INTAKE_ROTACION = 0;
+    public static double INTAKE_BRAZO = 0;
+    public static double OUTAKE_BRAZO = 0;
+    public static double OUTAKE_ROTACION = 0;
+    public static double OUTAKE_GARRA = 0;
+    public static double INTAKE_MUNECA = 0;
 
 
     @Override
@@ -60,6 +53,8 @@ public class Test_Servos extends LinearOpMode {
 //        outake.init();
 //        climber.init();
 
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         if (isStopRequested()) return;
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -70,7 +65,99 @@ public class Test_Servos extends LinearOpMode {
 //                    )
 //            );
 
+            switch (in_brazo){
+                case 1:
+                    intake.setBrazo(INTAKE_BRAZO);
+                    break;
 
+                default:
+                    break;
+            }
+            switch (in_rot){
+                case 1:
+                    intake.setRotation(INTAKE_ROTACION);
+                    break;
+
+                default:
+                    break;
+            }
+            switch (in_mun){
+                case 1:
+                    intake.setMuneca(INTAKE_MUNECA);
+                    break;
+
+                default:
+                    break;
+            }
+            switch (out_brazo){
+                case 1:
+                    outake.setBrazo(OUTAKE_BRAZO);
+                    break;
+
+                default:
+                    break;
+            }
+            switch (out_rot){
+                case 1:
+                    outake.setBrazo(OUTAKE_ROTACION);
+                    break;
+
+                default:
+                    break;
+            }
+
+            if(gamepad1.dpad_up){
+                if(in_rot == 0){
+                    in_rot = 1;
+                    active = "INTAKE ROTACION";
+                } else {
+                    in_rot = 0;
+                    active = "NONE";
+                }
+            }
+
+            if(gamepad1.dpad_down){
+                if(in_mun == 0){
+                    in_mun = 1;
+                    active = "INTAKE MUNECA";
+                } else {
+                    in_mun = 0;
+                    active = "NONE";
+                }
+            }
+
+            if(gamepad1.dpad_left){
+                if(in_brazo == 0){
+                    in_brazo = 1;
+                    active = "INTAKE BRAZO";
+                } else {
+                    in_brazo = 0;
+                    active = "NONE";
+                }
+            }
+
+            if(gamepad1.y){
+                if(out_rot == 0){
+                    out_rot = 1;
+                    active = "OUTAKE ROTACION";
+                } else {
+                    out_rot = 0;
+                    active = "NONE";
+                }
+            }
+
+            if(gamepad1.x){
+                if(out_brazo == 0){
+                    out_brazo = 1;
+                    active = "OUTAKE BRAZO";
+                } else {
+                    out_brazo = 0;
+                    active = "NONE";
+                }
+            }
+
+            telemetry.addData("current servo: ", active);
+            telemetry.update();
 
             drive.updatePoseEstimate();
             intake.updatePID();
