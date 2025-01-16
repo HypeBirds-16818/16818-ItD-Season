@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -21,6 +23,7 @@ public class TeleOp extends LinearOpMode {
     public static int targetOutake = 0;
 
     public enum RobotState{
+        PRE_IDLE,
         IDLE,
         INTAKING,
         CLOSE_INTAKE,
@@ -39,40 +42,47 @@ public class TeleOp extends LinearOpMode {
         RESET_OUTAKE
     }
 
-    RobotState robotState = RobotState.IDLE;
+    RobotState robotState = RobotState.PRE_IDLE;
 
-    public static double ROT_OUT_CERO = 0;
-    public static double ROT_OUT_CIENTOCHENTA = 1;
+    public static double ROT_OUT_CERO = 0.97;
+    public static double ROT_OUT_CIENTOCHENTA = 0;
     public static int CLIMBER_ABAJO = 0;
     public static int CLIMBER_SLIGHTLY = 400;
     public static int CLIMBER_F_BASKET = 1000;
     public static int CLIMBER_S_BASKET = 2000;
     public static int CLIMBER_RUNG = 2500;
-    public static double BRAZO_OUT_ABAJO = 0;
-    public static double BRAZO_OUT_MEDIO = 0.25;
-    public static double BRAZO_OUT_ARRIBA = 0.5;
+    public static double BRAZO_OUT_ABAJO = 0.1;
+    public static double BRAZO_OUT_MEDIO = 0.3;
+    public static double BRAZO_OUT_ARRIBA = 0.4;
     public static double BRAZO_OUT_ATRAS = 1;
-    public static double GARRA_ABIERTA = 1;
-    public static double GARRA_CERRADA = 0;
+    public static double GARRA_ABIERTA_I = 0.6;
+    public static double GARRA_CERRADA_I = 0.99;
+
+    public static double GARRA_ABIERTA_O = 0;
+    public static double GARRA_CERRADA_O = 0.19;
     public static int SLIDER_I_IN = 0;
     public static int SLIDER_I_OUT = 500;
-    public static double ROT_IN_CERO = 0;
-    public static double ROT_IN_NOVENTA = 0.5;
+    public static double ROT_IN_CERO = 1;
+    public static double ROT_IN_NOVENTA = 0.645;
     public static double ROT_IN_CIENTOCHENTA = 1;
-    public static double BRAZO_IN_CERO = 0;
-    public static double BRAZO_IN_NOVENTA = 0.5;
-    public static double BRAZO_IN_CIENTOCHENTA = 1;
+    public static double BRAZO_IN_CERO = 1;
+    public static double BRAZO_IN_NOVENTA = 0.6;
+    public static double BRAZO_IN_CIENTOCHENTA = 0.17;
+    public static double MUNECA_VER = 0.65;
+    public static double MUNECA_HOR = 0.97;
 
     public boolean flag = false;
     public boolean flag2 = false;
     
-    public double ir = 0;
-    public double im = 0;
-    public double ib = 0;
-    public double or = 0;
-    public double ob = 0;
-    public double ig = 0;
-    public double og = 0;
+    public double ir = ROT_IN_CERO;
+    public double im = MUNECA_VER;
+    public double ib = BRAZO_IN_CERO;
+    public double or = ROT_OUT_CERO;
+    public double ob = BRAZO_OUT_MEDIO;
+    public double ig = GARRA_ABIERTA_I;
+    public double og = GARRA_ABIERTA_O;
+
+    public String state = "None";
 
 
     @Override
@@ -85,8 +95,9 @@ public class TeleOp extends LinearOpMode {
 
         waitForStart();
         intake.init();
-        outake.init();
+//        outake.init();
         climber.init();
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         if (isStopRequested()) return;
 
@@ -99,12 +110,24 @@ public class TeleOp extends LinearOpMode {
             );
 
             switch(robotState){
+                case PRE_IDLE:
+                    state = "PRE_IDLE";
+                    ob =  BRAZO_OUT_MEDIO;
+                    or = ROT_OUT_CERO;
+                    ib = BRAZO_IN_CERO;
+                    ir = ROT_IN_CERO;
+                    im = MUNECA_VER;
+                    ig = GARRA_ABIERTA_I;
+                    og = GARRA_ABIERTA_O;
+                    timer.reset();
+                    robotState = RobotState.IDLE;
                 case IDLE:
                     if(timer.seconds() < 1){
+                        state = "IDLE";
                         // posicion del brazo del outake inicial
                         ob = (BRAZO_OUT_MEDIO);
                         // cerrar garra del outake
-                        og = GARRA_CERRADA;
+                        og = GARRA_CERRADA_O;
                         // servos en posicion inicial
                         ib = BRAZO_IN_CERO;
                         ir = ROT_IN_CERO;
@@ -125,9 +148,10 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case INTAKING:
-
+                    state = "INTAKING";
                     // abrir garra
-                    ig = GARRA_ABIERTA;
+                    ig = GARRA_ABIERTA_I;
+                    og = GARRA_ABIERTA_O;
 
                     if((gamepad1.a && flag)){
                         robotState = RobotState.CLOSE_INTAKE;
@@ -139,12 +163,14 @@ public class TeleOp extends LinearOpMode {
                     if(gamepad1.dpad_up){
                         targetIntake = SLIDER_I_OUT;
                         ib = (BRAZO_IN_NOVENTA);
+                        im = MUNECA_VER;
                         flag2 = true;
                         timer.reset();
                     }
                     if(gamepad1.dpad_down){
                         targetIntake = SLIDER_I_IN;
                         ib = (BRAZO_IN_CIENTOCHENTA);
+                        im = MUNECA_VER;
                         flag2 = true;
                         timer.reset();
 
@@ -158,8 +184,9 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case CLOSE_INTAKE:
+                    state = "CLOSE_INTAKE";
                     // cerrar garra del intake
-                    ig = GARRA_CERRADA;
+                    ig = GARRA_CERRADA_I;
                     // WIP - Sensor de tacto ve si agarramos algo y prende un LED
 
                     if(gamepad1.a){
@@ -171,8 +198,10 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case PRE_TRANSFER:
+                    state = "PRE_TRANSFER";
 
                     ib = (BRAZO_IN_NOVENTA);
+                    im = MUNECA_HOR;
 
                     // retrae slider
                     targetIntake = SLIDER_I_IN;
@@ -188,11 +217,12 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case DROP:
+                    state = "DROP";
                     if(timer.seconds() < 1){
                         ib = BRAZO_IN_CIENTOCHENTA;
                     }
                     if(timer.seconds() > 1 && timer.seconds() < 2){
-                        ig = GARRA_ABIERTA;
+                        ig = GARRA_ABIERTA_I;
                     }
                     if(timer.seconds() > 2 && timer.seconds() < 3){
                         ib = BRAZO_IN_NOVENTA;
@@ -203,6 +233,7 @@ public class TeleOp extends LinearOpMode {
                     }
 
                 case TRANSFER:
+                    state = "TRANSFER";
                     if(timer.seconds() < 1){
                         // gira intake
                         ir = (ROT_IN_CERO);
@@ -219,10 +250,10 @@ public class TeleOp extends LinearOpMode {
                     }
                     if(timer.seconds() > 3 && timer.seconds() < 4){
                         // abre intake
-                        og = GARRA_CERRADA;
+                        og = GARRA_CERRADA_O;
                     }
                     if(timer.seconds() > 4){
-                        ig = GARRA_ABIERTA;
+                        ig = GARRA_ABIERTA_I;
 
                         if(gamepad2.a){
                             robotState = RobotState.OUTAKING;
@@ -232,6 +263,7 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case OUTAKING:
+                    state = "OUTAKING";
                     if(timer.seconds() < 1){
                         // pone la altura del climber en 0
                         targetOutake = CLIMBER_ABAJO;
@@ -267,6 +299,7 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case RAISE1:
+                    state = "RAISE1";
                     // levantar el climber a la altura de la primera canasta
                     targetOutake = CLIMBER_F_BASKET;
 
@@ -282,6 +315,7 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case RAISE2:
+                    state = "RAISE2";
                     // levantar el climber a la altura de la segunda canasta
                     targetOutake = CLIMBER_S_BASKET;
 
@@ -294,8 +328,9 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case DROPPING:
+                    state = "DROPPING";
                     // abre la garra para dejar caer el sample
-                    og = GARRA_ABIERTA;
+                    og = GARRA_ABIERTA_O;
 
                     if(gamepad2.b){
                         robotState = RobotState.OUTAKING;
@@ -303,6 +338,7 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case SPECIMING:
+                    state = "SPECIMEN";
                     if(timer.seconds() < 1){
                         // levantar levemente el climber
                         targetOutake = CLIMBER_SLIGHTLY;
@@ -312,7 +348,7 @@ public class TeleOp extends LinearOpMode {
                         // rotar 180° el brazo del outake
                         ob = (BRAZO_OUT_ATRAS);
                         // abrir garra
-                        og = GARRA_ABIERTA;
+                        og = GARRA_ABIERTA_O;
                     }
 
                     if(gamepad1.x){
@@ -325,8 +361,9 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case CLOSE_S:
+                    state = "CLOSE_S";
                     // cerrar garra del outake
-                    og = GARRA_CERRADA;
+                    og = GARRA_CERRADA_O;
 
                     if(gamepad1.x){
                         robotState = RobotState.OUTAKING_S;
@@ -338,6 +375,7 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case OUTAKING_S:
+                    state = "OUTAKING_S";
                     // levanta un poquito el climber
                     targetOutake = CLIMBER_SLIGHTLY;
                 
@@ -350,6 +388,7 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case RAISE_S:
+                    state = "RAISE_S";
                     // levanta el climber al upper rung
                     targetOutake = CLIMBER_RUNG;
 
@@ -363,6 +402,7 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case DROPPING_S:
+                    state = "DROPPING_S";
                     if(timer.seconds() < 1){
                         // baja levemente el slider
                         targetOutake = CLIMBER_RUNG-300;
@@ -370,7 +410,7 @@ public class TeleOp extends LinearOpMode {
 
                     if(timer.seconds() > 1){
                         // abre la garra
-                        og = GARRA_ABIERTA;
+                        og = GARRA_ABIERTA_O;
                         // baja el climber a ligeramente arriba de 0
                         targetOutake = CLIMBER_SLIGHTLY;
                     }
@@ -385,6 +425,7 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case RESET_OUTAKE:
+                    state = "RESET_OUTAKE";
                     if(timer.seconds() < 1){
                         // climber ligeramente arriba de 0
                         targetOutake = CLIMBER_SLIGHTLY;
@@ -409,6 +450,9 @@ public class TeleOp extends LinearOpMode {
             intake.updatePID(targetIntake);
             climber.updatePID(targetOutake);
             runServos(intake, outake, ib, im, ir, ob, or, og, ig);
+
+            telemetry.addData("current state: ", state);
+            telemetry.update();
 
         }
     }

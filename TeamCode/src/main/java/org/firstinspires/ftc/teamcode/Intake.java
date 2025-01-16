@@ -34,9 +34,9 @@ public class Intake {
 
     public void init(){
         controller = new PIDController(p,i,d);
-        rotationIntake.setPosition(1);
-        garraIntake.setPosition(1);
-        munecaIntake.setPosition(1);
+//        rotationIntake.setPosition(1);
+//        garraIntake.setPosition(1);
+//        munecaIntake.setPosition(1);
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
