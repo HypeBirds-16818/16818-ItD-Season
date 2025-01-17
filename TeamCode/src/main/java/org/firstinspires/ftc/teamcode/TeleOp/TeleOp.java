@@ -36,6 +36,7 @@ public class TeleOp extends LinearOpMode {
         DROPPING,
         SPECIMING,
         CLOSE_S,
+        PRE_OUTAKING_S,
         OUTAKING_S,
         RAISE_S,
         DROPPING_S,
@@ -258,6 +259,7 @@ public class TeleOp extends LinearOpMode {
                         robotState = RobotState.PRE_TRANSFER;
                         timer.reset();
                     }
+                    break;
 
                 case TRANSFER:
                     state = "TRANSFER";
@@ -392,12 +394,14 @@ public class TeleOp extends LinearOpMode {
 
                 case CLOSE_S:
                     state = "CLOSE_S";
+
+                    targetOutake = CLIMBER_SLIGHTLY;
                     // cerrar garra del outake
                     og = GARRA_CERRADA_O;
 
                     if(timer.milliseconds() > 200){
                         if(gamepad1.x){
-                            robotState = RobotState.OUTAKING_S;
+                            robotState = RobotState.PRE_OUTAKING_S;
                             timer.reset();
 
                         }
@@ -408,11 +412,24 @@ public class TeleOp extends LinearOpMode {
 
                     break;
 
+                case PRE_OUTAKING_S:
+                    state = "PRE_OUTAKING_S";
+                    // levanta un poquito el climber
+                    targetOutake = CLIMBER_SLIGHTLY-400;
+                    if(timer.milliseconds() > 200){
+                        if(gamepad1.x){
+                            robotState = RobotState.OUTAKING_S;
+                        }
+                        if(gamepad1.b){
+                            robotState = RobotState.CLOSE_S;
+                        }
+                    }
+
+
                 case OUTAKING_S:
 
                     state = "OUTAKING_S";
-                    // levanta un poquito el climber
-                    targetOutake = CLIMBER_SLIGHTLY-400;
+
 
                     if(timer.milliseconds() < 200){
                         ob = BRAZO_OUT_ATRAS - 0.1;
@@ -491,8 +508,14 @@ public class TeleOp extends LinearOpMode {
 
                     // brazo de outake default
                     if(timer.seconds() > 3){
-                        robotState = RobotState.IDLE;
-                        timer.reset();
+                        if(gamepad2.a){
+                            robotState = RobotState.IDLE;
+                            timer.reset();
+                        }
+                        if(gamepad2.x){
+                            robotState = RobotState.SPECIMING;
+                            timer.reset();
+                        }
                     }
                     break;
             }
