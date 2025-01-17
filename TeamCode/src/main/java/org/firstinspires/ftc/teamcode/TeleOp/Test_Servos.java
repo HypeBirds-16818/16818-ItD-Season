@@ -21,13 +21,13 @@ import org.firstinspires.ftc.teamcode.Outtake;
 public class Test_Servos extends LinearOpMode {
 
     public String active = "None";
-    public int in_gar = 0;
-    public int in_rot = 0;
-    public int in_brazo = 0;
-    public int in_mun = 0;
-    public int out_brazo = 0;
-    public int out_rot = 0;
-    public int out_garra = 0;
+    public static int in_gar = 0;
+    public static int in_rot = 0;
+    public static int in_brazo = 0;
+    public static int in_mun = 0;
+    public static int out_brazo = 0;
+    public static int out_rot = 0;
+    public static int out_garra = 0;
 
     public static int INTAKE_TARGET = 0;
     public static int OUTTAKE_TARGET = 0;
@@ -89,6 +89,22 @@ public class Test_Servos extends LinearOpMode {
                 default:
                     break;
             }
+            switch (in_gar){
+                case 1:
+                    intake.setGarra(INTAKE_GARRA);
+                    break;
+
+                default:
+                    break;
+            }
+            switch (out_garra){
+                case 1:
+                    outake.setGarra(OUTAKE_GARRA);
+                    break;
+
+                default:
+                    break;
+            }
             switch (out_brazo){
                 case 1:
                     outake.setBrazo(OUTAKE_BRAZO);
@@ -99,7 +115,7 @@ public class Test_Servos extends LinearOpMode {
             }
             switch (out_rot){
                 case 1:
-                    outake.setBrazo(OUTAKE_ROTACION);
+                    outake.setRotation(OUTAKE_ROTACION);
                     break;
 
                 default:
