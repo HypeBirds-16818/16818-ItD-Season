@@ -46,14 +46,14 @@ public class TeleOp extends LinearOpMode {
 
     public static double ROT_OUT_CERO = 0.97;
     public static double ROT_OUT_CIENTOCHENTA = 0;
-    public static int CLIMBER_ABAJO = 0;
-    public static int CLIMBER_SLIGHTLY = 400;
-    public static int CLIMBER_F_BASKET = 1000;
-    public static int CLIMBER_S_BASKET = 2000;
-    public static int CLIMBER_RUNG = 2500;
-    public static double BRAZO_OUT_ABAJO = 0.1;
+    public static int CLIMBER_ABAJO = -50;
+    public static int CLIMBER_SLIGHTLY = -300;
+    public static int CLIMBER_F_BASKET = -1000;
+    public static int CLIMBER_S_BASKET = -3100;
+    public static int CLIMBER_RUNG = -2100;
+    public static double BRAZO_OUT_ABAJO = 0.05;
     public static double BRAZO_OUT_MEDIO = 0.3;
-    public static double BRAZO_OUT_ARRIBA = 0.4;
+    public static double BRAZO_OUT_ARRIBA = 0.7;
     public static double BRAZO_OUT_ATRAS = 1;
     public static double GARRA_ABIERTA_I = 0.6;
     public static double GARRA_CERRADA_I = 0.99;
@@ -67,9 +67,10 @@ public class TeleOp extends LinearOpMode {
     public static double ROT_IN_CIENTOCHENTA = 1;
     public static double BRAZO_IN_CERO = 1;
     public static double BRAZO_IN_NOVENTA = 0.6;
-    public static double BRAZO_IN_CIENTOCHENTA = 0.17;
+    public static double BRAZO_IN_CIENTOCHENTA = 0.18;
     public static double MUNECA_VER = 0.65;
     public static double MUNECA_HOR = 0.97;
+    public static double velocity = 0.8;
 
     public boolean flag = false;
     public boolean flag2 = false;
@@ -92,6 +93,7 @@ public class TeleOp extends LinearOpMode {
         Climber climber = new Climber(hardwareMap);
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0,0, 0));
         ElapsedTime timer = new ElapsedTime();
+        ElapsedTime cd = new ElapsedTime();
 
         waitForStart();
         intake.init();
@@ -105,7 +107,7 @@ public class TeleOp extends LinearOpMode {
 
             drive.setDrivePowers(
                     new PoseVelocity2d(
-                            new Vector2d(-gamepad1.left_stick_y * 0.8, -gamepad1.left_stick_x), -gamepad1.right_stick_x * 0.5
+                            new Vector2d(-gamepad1.left_stick_y * velocity, -gamepad1.left_stick_x * velocity), -gamepad1.right_stick_x * 0.3
                     )
             );
 
@@ -119,10 +121,14 @@ public class TeleOp extends LinearOpMode {
                     im = MUNECA_VER;
                     ig = GARRA_ABIERTA_I;
                     og = GARRA_ABIERTA_O;
+                    targetOutake = 0;
+                    targetIntake = -50;
                     timer.reset();
                     robotState = RobotState.IDLE;
                 case IDLE:
                     if(timer.seconds() < 1){
+                        flag = false;
+                        flag2 = false;
                         state = "IDLE";
                         // posicion del brazo del outake inicial
                         ob = (BRAZO_OUT_MEDIO);
@@ -136,6 +142,7 @@ public class TeleOp extends LinearOpMode {
                     if(timer.seconds() > 1){
                         // intake sliders en 0
                         targetIntake = 0;
+                        targetOutake = -50;
                         if(gamepad1.a){
                             robotState = RobotState.INTAKING;
                         }
@@ -155,11 +162,22 @@ public class TeleOp extends LinearOpMode {
 
                     if((gamepad1.a && flag)){
                         robotState = RobotState.CLOSE_INTAKE;
+                        timer.reset();
                     }
                     if((gamepad1.b && flag)){
                         robotState = RobotState.IDLE;
                         timer.reset();
                     }
+                    if(gamepad1.dpad_right && flag && im != 0.49 && cd.milliseconds() > 200){
+                        im = im - 0.16;
+                        cd.reset();
+                    }
+                    if(gamepad1.dpad_left && flag && im != 0.97 && cd.milliseconds() > 200){
+                        im = im + 0.16;
+                        cd.reset();
+                    }
+
+
                     if(gamepad1.dpad_up){
                         targetIntake = SLIDER_I_OUT;
                         ib = (BRAZO_IN_NOVENTA);
@@ -180,6 +198,7 @@ public class TeleOp extends LinearOpMode {
                         ib = BRAZO_IN_CIENTOCHENTA;
                         flag2 = false;
                         flag = true;
+                        cd.reset();
                     }
                     break;
 
@@ -189,12 +208,16 @@ public class TeleOp extends LinearOpMode {
                     ig = GARRA_CERRADA_I;
                     // WIP - Sensor de tacto ve si agarramos algo y prende un LED
 
-                    if(gamepad1.a){
-                        robotState = RobotState.PRE_TRANSFER;
+                    if(timer.milliseconds() > 200){
+                        if(gamepad1.a){
+                            robotState = RobotState.PRE_TRANSFER;
+                            timer.reset();
+                        }
+                        if(gamepad1.b){
+                            robotState = RobotState.INTAKING;
+                        }
                     }
-                    if(gamepad1.b){
-                        robotState = RobotState.INTAKING;
-                    }
+
                     break;
 
                 case PRE_TRANSFER:
@@ -206,14 +229,17 @@ public class TeleOp extends LinearOpMode {
                     // retrae slider
                     targetIntake = SLIDER_I_IN;
 
-                    if(gamepad1.a){
-                        robotState = RobotState.TRANSFER;
-                        timer.reset();
+                    if(timer.milliseconds() > 500){
+                        if(gamepad1.a){
+                            robotState = RobotState.TRANSFER;
+                            timer.reset();
+                        }
+                        if(gamepad1.b){
+                            robotState = RobotState.DROP;
+                            timer.reset();
+                        }
                     }
-                    if(gamepad1.b){
-                        robotState = RobotState.DROP;
-                        timer.reset();
-                    }
+
                     break;
 
                 case DROP:
@@ -224,11 +250,12 @@ public class TeleOp extends LinearOpMode {
                     if(timer.seconds() > 1 && timer.seconds() < 2){
                         ig = GARRA_ABIERTA_I;
                     }
-                    if(timer.seconds() > 2 && timer.seconds() < 3){
+                    if(timer.seconds() > 2 && timer.seconds() < 4){
                         ib = BRAZO_IN_NOVENTA;
                     }
-                    if(timer.seconds() > 3){
-                        robotState = RobotState.IDLE;
+
+                    if(timer.seconds() > 4){
+                        robotState = RobotState.PRE_TRANSFER;
                         timer.reset();
                     }
 
@@ -271,8 +298,6 @@ public class TeleOp extends LinearOpMode {
                         ob = (BRAZO_OUT_MEDIO);
                     }
 
-
-
                     if(timer.seconds() > 1 && timer.seconds() < 3){
                         // da la vuelta al outake 270°
                         or = (ROT_OUT_CIENTOCHENTA);
@@ -285,6 +310,7 @@ public class TeleOp extends LinearOpMode {
 
                         if(gamepad2.right_bumper){
                             robotState = RobotState.RAISE1;
+                            timer.reset();
                         }
                         if(gamepad2.b){
                             robotState = RobotState.RESET_OUTAKE;
@@ -303,15 +329,18 @@ public class TeleOp extends LinearOpMode {
                     // levantar el climber a la altura de la primera canasta
                     targetOutake = CLIMBER_F_BASKET;
 
-                    if(gamepad2.left_bumper){
-                        robotState = RobotState.OUTAKING;
+                    if(timer.milliseconds() > 200){
+                        if(gamepad2.left_bumper){
+                            robotState = RobotState.OUTAKING;
+                        }
+                        if(gamepad2.right_bumper){
+                            robotState = RobotState.RAISE2;
+                        }
+                        if(gamepad2.a){
+                            robotState = RobotState.DROPPING;
+                        }
                     }
-                    if(gamepad2.right_bumper){
-                        robotState = RobotState.RAISE2;
-                    }
-                    if(gamepad2.a){
-                        robotState = RobotState.DROPPING;
-                    }
+
                     break;
 
                 case RAISE2:
@@ -349,14 +378,15 @@ public class TeleOp extends LinearOpMode {
                         ob = (BRAZO_OUT_ATRAS);
                         // abrir garra
                         og = GARRA_ABIERTA_O;
-                    }
 
-                    if(gamepad1.x){
-                        robotState = RobotState.CLOSE_S;
-                    }
-                    if(gamepad1.b){
-                        robotState = RobotState.IDLE;
-                        timer.reset();
+                        if(gamepad1.x){
+                            robotState = RobotState.CLOSE_S;
+                            timer.reset();
+                        }
+                        if(gamepad1.b){
+                            robotState = RobotState.IDLE;
+                            timer.reset();
+                        }
                     }
                     break;
 
@@ -365,26 +395,40 @@ public class TeleOp extends LinearOpMode {
                     // cerrar garra del outake
                     og = GARRA_CERRADA_O;
 
-                    if(gamepad1.x){
-                        robotState = RobotState.OUTAKING_S;
-                        
+                    if(timer.milliseconds() > 200){
+                        if(gamepad1.x){
+                            robotState = RobotState.OUTAKING_S;
+                            timer.reset();
+
+                        }
+                        if(gamepad1.b){
+                            robotState = RobotState.SPECIMING;
+                        }
                     }
-                    if(gamepad1.b){
-                        robotState = RobotState.SPECIMING;
-                    }
+
                     break;
 
                 case OUTAKING_S:
+
                     state = "OUTAKING_S";
                     // levanta un poquito el climber
-                    targetOutake = CLIMBER_SLIGHTLY;
-                
-                    // rota 180° el outake
-                    or = (ROT_OUT_CIENTOCHENTA);
-                    
-                    if(gamepad2.right_bumper){
-                        robotState = RobotState.RAISE_S;
+                    targetOutake = CLIMBER_SLIGHTLY-400;
+
+                    if(timer.milliseconds() < 200){
+                        ob = BRAZO_OUT_ATRAS - 0.1;
                     }
+                    if(timer.milliseconds() > 200 && timer.milliseconds() < 1000){
+                        // rota 180° el outake
+                        or = (ROT_OUT_CIENTOCHENTA);
+                    }
+                    if(timer.milliseconds() > 1000){
+                        ob = BRAZO_OUT_ATRAS;
+                        if(gamepad2.right_bumper){
+                            robotState = RobotState.RAISE_S;
+                            timer.reset();
+                        }
+                    }
+
                     break;
 
                 case RAISE_S:
@@ -392,43 +436,49 @@ public class TeleOp extends LinearOpMode {
                     // levanta el climber al upper rung
                     targetOutake = CLIMBER_RUNG;
 
-                    if(gamepad2.left_bumper){
-                        robotState = RobotState.OUTAKING_S;
+                    if(timer.milliseconds() > 200){
+                        if(gamepad2.left_bumper){
+                            robotState = RobotState.OUTAKING_S;
+                        }
+                        if(gamepad2.a){
+                            robotState = RobotState.DROPPING_S;
+                            timer.reset();
+                        }
                     }
-                    if(gamepad2.a){
-                        robotState = RobotState.DROPPING_S;
-                        timer.reset();
-                    }
+
                     break;
 
                 case DROPPING_S:
                     state = "DROPPING_S";
                     if(timer.seconds() < 1){
                         // baja levemente el slider
-                        targetOutake = CLIMBER_RUNG-300;
+                        targetOutake = CLIMBER_RUNG+800;
                     }
 
                     if(timer.seconds() > 1){
                         // abre la garra
                         og = GARRA_ABIERTA_O;
                         // baja el climber a ligeramente arriba de 0
-                        targetOutake = CLIMBER_SLIGHTLY;
+                        targetOutake = CLIMBER_SLIGHTLY-600;
                     }
 
                     // EN PARALELO
                     // regresa el intake a posicion de IDLE
 
-                    if(gamepad2.a){
-                        robotState = RobotState.RESET_OUTAKE;
-                        timer.reset();
+                    if(timer.seconds() > 2){
+                        if(gamepad2.a){
+                            robotState = RobotState.RESET_OUTAKE;
+                            timer.reset();
+                        }
                     }
+
                     break;
 
                 case RESET_OUTAKE:
                     state = "RESET_OUTAKE";
                     if(timer.seconds() < 1){
                         // climber ligeramente arriba de 0
-                        targetOutake = CLIMBER_SLIGHTLY;
+                        targetOutake = CLIMBER_SLIGHTLY-600;
                     }
                     if(timer.seconds() > 1 && timer.seconds() < 2){
                         // brazo de outtake recto
@@ -445,6 +495,13 @@ public class TeleOp extends LinearOpMode {
                         timer.reset();
                     }
                     break;
+            }
+
+            if(gamepad1.left_bumper){
+                velocity = 0.8;
+            }
+            if(gamepad1.right_bumper){
+                velocity = 0.3;
             }
             drive.updatePoseEstimate();
             intake.updatePID(targetIntake);

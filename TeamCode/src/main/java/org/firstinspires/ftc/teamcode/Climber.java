@@ -48,7 +48,7 @@ public class Climber {
         slidepos = (motor1pos + motor2pos)/2;
 
         double pid = controller.calculate(slidepos, Ttarget);
-        double ff = Math.cos(Math.toRadians(target / ticks_per_degree)) * f;
+        double ff = Math.cos(Math.toRadians(Ttarget / ticks_per_degree)) * f;
         double power = pid + ff;
 
         motor1.setPower(power);
