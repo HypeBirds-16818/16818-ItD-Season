@@ -71,7 +71,9 @@ public class TeleOp extends LinearOpMode {
     public static double BRAZO_IN_CIENTOCHENTA = 0.18;
     public static double MUNECA_VER = 0.65;
     public static double MUNECA_HOR = 0.97;
-    public static double velocity = 0.8;
+    public static double velocity = 0.5;
+    public static double velocity_rot = 0.5;
+    public static double velocity_lat = 0.5;
 
     public boolean flag = false;
     public boolean flag2 = false;
@@ -108,7 +110,7 @@ public class TeleOp extends LinearOpMode {
 
             drive.setDrivePowers(
                     new PoseVelocity2d(
-                            new Vector2d(-gamepad1.left_stick_y * velocity, -gamepad1.left_stick_x * velocity), -gamepad1.right_stick_x * 0.3
+                            new Vector2d(-gamepad1.left_stick_y * velocity, -gamepad1.left_stick_x * velocity_lat), -gamepad1.right_stick_x * velocity_rot
                     )
             );
 
@@ -127,6 +129,9 @@ public class TeleOp extends LinearOpMode {
                     timer.reset();
                     robotState = RobotState.IDLE;
                 case IDLE:
+                    if(timer.milliseconds() < 100){
+                        gamepad1.rumble(200);
+                    }
                     if(timer.seconds() < 1){
                         flag = false;
                         flag2 = false;
@@ -305,6 +310,10 @@ public class TeleOp extends LinearOpMode {
                         or = (ROT_OUT_CIENTOCHENTA);
                     }
 
+                    if(timer.seconds() > 3 && timer.milliseconds() < 3500){
+                        gamepad2.rumble(100);
+                    }
+
                     if(timer.seconds() > 3){
                         // levanta totalmente el brazo del outake
                         ob = (BRAZO_OUT_ARRIBA);
@@ -433,6 +442,7 @@ public class TeleOp extends LinearOpMode {
 
                     if(timer.milliseconds() < 200){
                         ob = BRAZO_OUT_ATRAS - 0.1;
+                        gamepad2.rumble(200);
                     }
                     if(timer.milliseconds() > 200 && timer.milliseconds() < 1000){
                         // rota 180° el outake
@@ -520,11 +530,25 @@ public class TeleOp extends LinearOpMode {
                     break;
             }
 
+            if(gamepad1.left_trigger > 0.8){
+                velocity = 0.15;
+                velocity_lat = 0.15;
+                velocity_rot = 0.15;
+            }
             if(gamepad1.left_bumper){
-                velocity = 0.8;
+                velocity = 0.3;
+                velocity_lat = 0.5;
+                velocity_rot = 0.4;
             }
             if(gamepad1.right_bumper){
-                velocity = 0.3;
+                velocity = 0.5;
+                velocity_lat = 0.7;
+                velocity_rot = 0.6;
+            }
+            if(gamepad1.right_trigger > 0.8){
+                velocity = 0.8;
+                velocity_lat = 1;
+                velocity_rot = 0.9;
             }
             drive.updatePoseEstimate();
             intake.updatePID(targetIntake);
