@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -30,6 +31,18 @@ public class Outtake {
 
     public void setGarra(double position){
         garraOuttake.setPosition(position);
+    }
+
+    public Action setRotationAction(double position){
+        return new ServoAction(rotationOuttake, position);
+    }
+
+    public Action setBrazoAction(double position){
+        return new ServoAction(rotationOuttake, position);
+    }
+
+    public Action setGarraAction(double position){
+        return new ServoAction(rotationOuttake, position);
     }
 
 }

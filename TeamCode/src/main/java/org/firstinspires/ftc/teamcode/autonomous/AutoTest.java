@@ -21,13 +21,21 @@ public class AutoTest extends LinearOpMode {
 
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
                 .splineTo(new Vector2d(38.78, -12.78), Math.toRadians(90.00))
+                .waitSeconds(1)
                 .strafeTo(new Vector2d(47.74, -12.64))
+                .waitSeconds(1)
                 .strafeTo(new Vector2d(47.74, -60.30))
+                .waitSeconds(1)
                 .strafeTo(new Vector2d(47.74, -9.89))
+                .waitSeconds(1)
                 .strafeTo(new Vector2d(58.28, -9.89))
+                .waitSeconds(1)
                 .strafeTo(new Vector2d(58.71, -60.30))
+                .waitSeconds(1)
                 .strafeTo(new Vector2d(58.28, -12.64))
+                .waitSeconds(1)
                 .strafeTo(new Vector2d(62.90, -12.64))
+                .waitSeconds(1)
                 .strafeTo(new Vector2d(62.90, -60.30));
 
 
