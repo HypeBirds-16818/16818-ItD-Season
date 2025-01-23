@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -24,16 +28,17 @@ public class Intake {
     private final double ticks_per_degree = 537.7/180;
 
     public Intake(HardwareMap hardwareMap){
+
+
+    }
+
+    public void init(HardwareMap hardwareMap){
+        controller = new PIDController(p,i,d);
         rotationIntake = hardwareMap.get(Servo.class, "rotationIntake");
         brazoIntake = hardwareMap.get(Servo.class, "brazoIntake");
         garraIntake = hardwareMap.get(Servo.class, "garraIntake");
         poleasIntake = hardwareMap.get(DcMotorEx.class, "intake");
         munecaIntake = hardwareMap.get(Servo.class, "munecaIntake");
-
-    }
-
-    public void init(){
-        controller = new PIDController(p,i,d);
 //        rotationIntake.setPosition(1);
 //        garraIntake.setPosition(1);
 //        munecaIntake.setPosition(1);
@@ -55,8 +60,31 @@ public class Intake {
         poleasIntake.setPower(power);
     }
 
-    public void setTarget(int newTarget){
-        target = newTarget;
+    public Action updatePIDAction(){
+        return new Action(){
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                controller.setPID(p,i,d);
+                int intakePos = poleasIntake.getCurrentPosition();
+
+                double pid = controller.calculate(intakePos, target);
+                double power = pid;
+
+                poleasIntake.setPower(power);
+                return true;
+            }
+        };
+    }
+
+    public Action setTarget(int newTarget){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                target = newTarget;
+                return false;
+            }
+        };
     }
 
     public void setRotation(double position){
@@ -71,8 +99,23 @@ public class Intake {
         garraIntake.setPosition(position);
     }
 
-
-
     public void setMuneca(double position){ munecaIntake.setPosition(position);}
+
+    public Action setRotationAction(double position){
+        return new ServoAction(rotationIntake, position);
+    }
+
+    public Action setBrazoAction(double position){
+        return new ServoAction(brazoIntake, position);
+    }
+
+    public Action setGarraAction(double position){
+        return new ServoAction(garraIntake, position);
+    }
+
+    public Action setMunecaAction(double position){
+        return new ServoAction(munecaIntake, position);
+    }
+
 
 }

@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -23,13 +27,14 @@ public class Climber {
     private DcMotorEx piston;
 
     public Climber(HardwareMap hardwareMap){
+
+    }
+
+    public void init(HardwareMap hardwareMap){
         motor1 = hardwareMap.get(DcMotorEx.class, "motor1");
         motor2 = hardwareMap.get(DcMotorEx.class, "motor2");
         piston = hardwareMap.get(DcMotorEx.class, "piston");
         motor2.setDirection(DcMotorSimple.Direction.REVERSE);
-    }
-
-    public void init(){
         controller = new PIDController(p,i,d);
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -55,8 +60,35 @@ public class Climber {
         motor2.setPower(power);
     }
 
-    public void setTarget(int newTarget){
-        target = newTarget;
+    public Action updatePIDAction(){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                controller.setPID(p,i,d);
+                int motor1pos = motor1.getCurrentPosition();
+                int motor2pos = motor2.getCurrentPosition();
+
+                slidepos = (motor1pos + motor2pos)/2;
+
+                double pid = controller.calculate(slidepos, target);
+                double ff = Math.cos(Math.toRadians(target / ticks_per_degree)) * f;
+                double power = pid + ff;
+
+                motor1.setPower(power);
+                motor2.setPower(power);
+                return true;
+            }
+        };
+    }
+
+    public Action setTarget(int newTarget){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                target = newTarget;
+                return false;
+            }
+        };
     }
 
     public void setPistonSpeed(double speed){
