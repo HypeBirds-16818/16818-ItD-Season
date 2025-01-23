@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.mechanisms;
 
 import androidx.annotation.NonNull;
 
@@ -18,13 +18,11 @@ public class Climber {
 
     public static int target = 0;
 
-    public double pistonpw = 0;
     public int slidepos;
     private final double ticks_per_degree = 537.7/180;
 
     private DcMotorEx motor1;
     private DcMotorEx motor2;
-    private DcMotorEx piston;
 
     public Climber(HardwareMap hardwareMap){
 
@@ -33,7 +31,6 @@ public class Climber {
     public void init(HardwareMap hardwareMap){
         motor1 = hardwareMap.get(DcMotorEx.class, "motor1");
         motor2 = hardwareMap.get(DcMotorEx.class, "motor2");
-        piston = hardwareMap.get(DcMotorEx.class, "piston");
         motor2.setDirection(DcMotorSimple.Direction.REVERSE);
         controller = new PIDController(p,i,d);
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -91,9 +88,6 @@ public class Climber {
         };
     }
 
-    public void setPistonSpeed(double speed){
-        piston.setPower(speed);
-    }
 
     public int getSlidePos(){
         return slidepos;
