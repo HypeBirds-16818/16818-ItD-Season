@@ -27,13 +27,14 @@ public class Climber {
     private DcMotorEx piston;
 
     public Climber(HardwareMap hardwareMap){
+
+    }
+
+    public void init(HardwareMap hardwareMap){
         motor1 = hardwareMap.get(DcMotorEx.class, "motor1");
         motor2 = hardwareMap.get(DcMotorEx.class, "motor2");
         piston = hardwareMap.get(DcMotorEx.class, "piston");
         motor2.setDirection(DcMotorSimple.Direction.REVERSE);
-    }
-
-    public void init(){
         controller = new PIDController(p,i,d);
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);

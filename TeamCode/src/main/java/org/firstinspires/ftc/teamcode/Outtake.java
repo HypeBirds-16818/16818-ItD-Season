@@ -38,11 +38,11 @@ public class Outtake {
     }
 
     public Action setBrazoAction(double position){
-        return new ServoAction(rotationOuttake, position);
+        return new ServoAction(brazoOuttake, position);
     }
 
     public Action setGarraAction(double position){
-        return new ServoAction(rotationOuttake, position);
+        return new ServoAction(garraOuttake, position);
     }
 
 }

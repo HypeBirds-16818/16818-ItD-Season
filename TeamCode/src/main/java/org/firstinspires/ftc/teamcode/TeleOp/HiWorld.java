@@ -81,9 +81,9 @@ public class HiWorld extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime();
 
         waitForStart();
-        intake.init();
+        intake.init(hardwareMap);
 //        outake.init();
-        climber.init();
+        climber.init(hardwareMap);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         if (isStopRequested()) return;

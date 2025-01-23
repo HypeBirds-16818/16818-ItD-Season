@@ -51,7 +51,7 @@ public class TeleOp extends LinearOpMode {
     public static int CLIMBER_SLIGHTLY = -300;
     public static int CLIMBER_F_BASKET = -1000;
     public static int CLIMBER_S_BASKET = -3100;
-    public static int CLIMBER_RUNG = -1500;
+    public static int CLIMBER_RUNG = -2100;
     public static double BRAZO_OUT_ABAJO = 0.05;
     public static double BRAZO_OUT_MEDIO = 0.3;
     public static double BRAZO_OUT_ARRIBA = 0.7;
@@ -63,7 +63,7 @@ public class TeleOp extends LinearOpMode {
     public static double GARRA_CERRADA_O = 0.19;
     public static int SLIDER_I_IN = 0;
     public static int SLIDER_I_OUT = 500;
-    public static double ROT_IN_CERO = 1;
+    public static double ROT_IN_CERO = 0.97;
     public static double ROT_IN_NOVENTA = 0.645;
     public static double ROT_IN_CIENTOCHENTA = 1;
     public static double BRAZO_IN_CERO = 1;
@@ -100,9 +100,9 @@ public class TeleOp extends LinearOpMode {
         ElapsedTime cd = new ElapsedTime();
 
         waitForStart();
-        intake.init();
+        intake.init(hardwareMap);
 //        outake.init();
-        climber.init();
+        climber.init(hardwareMap);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         if (isStopRequested()) return;
@@ -271,25 +271,25 @@ public class TeleOp extends LinearOpMode {
 
                 case TRANSFER:
                     state = "TRANSFER";
-                    if(timer.seconds() < 1){
+                    if(timer.milliseconds() < 500){
                         // gira intake
                         ir = (ROT_IN_CERO);
                         // gira brazo intake
                         ob = (BRAZO_OUT_MEDIO);
                     }
 
-                    if(timer.seconds() > 1 && timer.seconds() < 2){
+                    if(timer.milliseconds() > 500 && timer.milliseconds() < 1200){
                         // pone outake en posicion
                         ib = (BRAZO_IN_CERO);
                     }
-                    if(timer.seconds() > 2 && timer.seconds() < 3){
+                    if(timer.milliseconds() > 1200 && timer.seconds() < 2){
                         ob = (BRAZO_OUT_ABAJO);
                     }
-                    if(timer.seconds() > 3 && timer.seconds() < 4){
+                    if(timer.milliseconds() > 2000 && timer.milliseconds() < 2700){
                         // abre intake
                         og = GARRA_CERRADA_O;
                     }
-                    if(timer.seconds() > 4){
+                    if(timer.milliseconds() > 2700){
                         ig = GARRA_ABIERTA_I;
 
                         if(gamepad2.a){
@@ -305,25 +305,25 @@ public class TeleOp extends LinearOpMode {
 
                 case OUTAKING:
                     state = "OUTAKING";
-                    if(timer.seconds() < 1){
+                    if(timer.milliseconds() < 500){
                         // pone la altura del climber en 0
                         targetOutake = CLIMBER_ABAJO;
                         // levanza el brazo el outake
                         ob = (BRAZO_OUT_MEDIO);
                     }
 
-                    if(timer.seconds() > 1 && timer.seconds() < 3){
+                    if(timer.milliseconds() > 500 && timer.milliseconds() > 1500){
                         // da la vuelta al outake 270°
                         or = (ROT_OUT_CIENTOCHENTA);
                     }
 
-                    if(timer.seconds() > 3 && timer.milliseconds() < 3500){
+                    if(timer.milliseconds() > 1500 && timer.milliseconds() < 2500){
                         gamepad2.rumble(100);
                     }
 
-                    if(timer.seconds() > 3){
+                    if(timer.milliseconds() > 1500){
                         // levanta totalmente el brazo del outake
-                        ob = (BRAZO_OUT_ARRIBA);
+                        ob = (BRAZO_OUT_ARRIBA + 0.1);
                         targetOutake = CLIMBER_ABAJO;
 
                         if(gamepad2.right_bumper){
@@ -364,7 +364,7 @@ public class TeleOp extends LinearOpMode {
                 case RAISE2:
                     state = "RAISE2";
                     // levantar el climber a la altura de la segunda canasta
-                    targetOutake = CLIMBER_S_BASKET;
+                    targetOutake = CLIMBER_S_BASKET-500;
 
                     if(gamepad2.left_bumper){
                         robotState = RobotState.RAISE1;
@@ -388,7 +388,7 @@ public class TeleOp extends LinearOpMode {
                     state = "SPECIMEN";
                     if(timer.seconds() < 1){
                         // levantar levemente el climber
-                        targetOutake = CLIMBER_SLIGHTLY;
+                        targetOutake = CLIMBER_SLIGHTLY + 100;
                     }
 
                     if(timer.seconds() > 1){
@@ -413,7 +413,7 @@ public class TeleOp extends LinearOpMode {
 
                     targetOutake = CLIMBER_SLIGHTLY;
                     // cerrar garra del outake
-                    og = GARRA_CERRADA_O;
+                    og = GARRA_CERRADA_O + 0.02;
 
                     if(timer.milliseconds() > 200){
                         if(gamepad1.x){
@@ -459,7 +459,7 @@ public class TeleOp extends LinearOpMode {
                         or = (ROT_OUT_CIENTOCHENTA);
                     }
                     if(timer.milliseconds() > 1000){
-                        ob = BRAZO_OUT_ATRAS - 0.25;
+                        ob = BRAZO_OUT_ATRAS;
                         if(gamepad2.right_bumper){
                             robotState = RobotState.RAISE_S;
                             timer.reset();
@@ -471,7 +471,7 @@ public class TeleOp extends LinearOpMode {
                 case RAISE_S:
                     state = "RAISE_S";
                     // levanta el climber al upper rung
-                    targetOutake = CLIMBER_RUNG;
+                    targetOutake = CLIMBER_RUNG - 150;
 
                     if(timer.milliseconds() > 200){
                         if(gamepad2.left_bumper){
@@ -489,7 +489,7 @@ public class TeleOp extends LinearOpMode {
                     state = "DROPPING_S";
                     if(timer.seconds() < 1){
                         // baja levemente el slider
-                        targetOutake = CLIMBER_RUNG+400;
+                        targetOutake = CLIMBER_RUNG+1800;
                     }
 
                     if(timer.seconds() > 1){
@@ -577,7 +577,7 @@ public class TeleOp extends LinearOpMode {
                 }
             }
             if(gamepad2.dpad_down && nuke){
-                targetOutake = -2500;
+                targetOutake = -1800;
             }
             if(gamepad2.right_trigger > 0.2 && nuke){
                 climber.setPistonSpeed(gamepad2.right_trigger);

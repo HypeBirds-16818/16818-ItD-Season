@@ -26,18 +26,17 @@ public class AutoSample extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Pose2d initialPose = new Pose2d(-34.88, -24.34, Math.toRadians(180.00));
+        Pose2d initialPose = new Pose2d(-33.34, -62.80, Math.toRadians(90));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Outtake outake = new Outtake(hardwareMap);
         Intake intake = new Intake(hardwareMap);
         Climber climber = new Climber(hardwareMap);
-        ElapsedTime timer = new ElapsedTime();
 
-        climber.init();
-        intake.init();
+        climber.init(hardwareMap);
+        intake.init(hardwareMap);
 
         TrajectoryActionBuilder driveToFirstSample = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(new Vector2d(-48.75, -37.77), Math.toRadians(90.00));
+                .strafeToLinearHeading(new Vector2d(-49, -45.77), Math.toRadians(90.00));
 
         TrajectoryActionBuilder driveToBasketFirst = driveToFirstSample.endTrajectory().fresh()
                 .turnTo(Math.toRadians(225))
@@ -45,7 +44,7 @@ public class AutoSample extends LinearOpMode {
 
         TrajectoryActionBuilder driveToSecondSample = driveToBasketFirst.endTrajectory().fresh()
                 .turnTo(Math.toRadians(90))
-                .strafeToLinearHeading(new Vector2d(-59.15, -37.77), Math.toRadians(90.00));
+                .strafeToLinearHeading(new Vector2d(-59.5, -45.77), Math.toRadians(90.00));
 
         TrajectoryActionBuilder driveToBasketSecond = driveToSecondSample.endTrajectory().fresh()
                 .turnTo(Math.toRadians(225))
@@ -75,6 +74,7 @@ public class AutoSample extends LinearOpMode {
                             intake.setTarget(0),
                             climber.setTarget(-50)
                         ),
+                        new SleepAction(1),
                         new ParallelAction(
                                 //IDLE
                             outake.setBrazoAction(TeleOp.BRAZO_OUT_MEDIO),
@@ -103,7 +103,7 @@ public class AutoSample extends LinearOpMode {
                             intake.setRotationAction(TeleOp.ROT_IN_NOVENTA),
                             intake.setBrazoAction(TeleOp.BRAZO_IN_CIENTOCHENTA)
                         ),
-                        new SleepAction(1),
+                        new SleepAction(3),
                             // CLOSE CLAW
                         intake.setGarraAction(TeleOp.GARRA_CERRADA_I),
                         new SequentialAction(
@@ -142,6 +142,7 @@ public class AutoSample extends LinearOpMode {
                         ),
                         new SleepAction(1),
                         outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+                        new SleepAction(1),
                         new ParallelAction(
                             driveToSecondSample.build(),
                             new SequentialAction(
@@ -181,7 +182,7 @@ public class AutoSample extends LinearOpMode {
                                 intake.setRotationAction(TeleOp.ROT_IN_NOVENTA),
                                 intake.setBrazoAction(TeleOp.BRAZO_IN_CIENTOCHENTA)
                         ),
-                        new SleepAction(1),
+                        new SleepAction(3),
                         // CLOSE CLAW
                         intake.setGarraAction(TeleOp.GARRA_CERRADA_I),
                         new SequentialAction(

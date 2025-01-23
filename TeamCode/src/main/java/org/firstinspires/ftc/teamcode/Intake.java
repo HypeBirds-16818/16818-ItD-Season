@@ -28,16 +28,17 @@ public class Intake {
     private final double ticks_per_degree = 537.7/180;
 
     public Intake(HardwareMap hardwareMap){
+
+
+    }
+
+    public void init(HardwareMap hardwareMap){
+        controller = new PIDController(p,i,d);
         rotationIntake = hardwareMap.get(Servo.class, "rotationIntake");
         brazoIntake = hardwareMap.get(Servo.class, "brazoIntake");
         garraIntake = hardwareMap.get(Servo.class, "garraIntake");
         poleasIntake = hardwareMap.get(DcMotorEx.class, "intake");
         munecaIntake = hardwareMap.get(Servo.class, "munecaIntake");
-
-    }
-
-    public void init(){
-        controller = new PIDController(p,i,d);
 //        rotationIntake.setPosition(1);
 //        garraIntake.setPosition(1);
 //        munecaIntake.setPosition(1);
@@ -113,7 +114,7 @@ public class Intake {
     }
 
     public Action setMunecaAction(double position){
-        return new ServoAction(rotationIntake, position);
+        return new ServoAction(munecaIntake, position);
     }
 
 
