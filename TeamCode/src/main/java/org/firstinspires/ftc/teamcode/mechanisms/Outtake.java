@@ -14,6 +14,11 @@ public class Outtake {
     private Servo diffLeft;
     private Servo diffRight;
 
+    private double diffLeftPos;
+    private double diffRightPos;
+
+    private double offset = 0;
+
     public Outtake(HardwareMap hardwareMap){
 
     }
@@ -41,21 +46,28 @@ public class Outtake {
     }
 
     public void setInnerRotation(double position){
-        diffLeft.setPosition(position);
-        diffRight.setPosition(position);
+        diffLeftPos = position;
+        diffRightPos = position;
+
+        diffLeft.setPosition(diffLeftPos - offset);
+        diffRight.setPosition(diffRightPos + offset);
     }
 
     public void setGarra(double position){
         garraOuttake.setPosition(position);
     }
 
-    public void setMuneca(double position) {
-        diffLeft.setPosition(position);
-        diffRight.setPosition(1 - position);
+    public void setMuneca(double offset) {
+        this.offset = offset;
+
+        diffLeft.setPosition(diffLeftPos - offset);
+        diffRight.setPosition(diffRightPos + offset);
     }
 
     public Action setRotationAction(double position){
-        return new DualServoAction(rotationLeft, rotationRight, position, position);
+        diffLeftPos = position;
+        diffRightPos = position;
+        return new DualServoAction(diffLeft, diffRight, diffLeftPos - offset, diffRightPos + offset);
     }
 
     public Action setInnerRotationAction(double position){
@@ -66,8 +78,9 @@ public class Outtake {
         return new ServoAction(garraOuttake, position);
     }
 
-    public Action setMunecaAction(double position){
-        return new DualServoAction(diffLeft, diffRight, position, 1 - position);
+    public Action setMunecaAction(double offset){
+        this.offset = offset;
+        return new DualServoAction(diffLeft, diffRight, diffLeftPos - offset, diffRightPos + offset);
     }
 
 }

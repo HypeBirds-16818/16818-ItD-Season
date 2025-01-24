@@ -23,6 +23,11 @@ public class Intake {
     private Servo diffRight;
     private Servo garraIntake;
 
+    private double diffLeftPos;
+    private double diffRightPos;
+
+    private double offset = 0;
+
 
     public Intake(HardwareMap hardwareMap){
 
@@ -45,6 +50,7 @@ public class Intake {
 //        diffLeft.setPosition(0);
 //        diffRight.setPosition(0);
 
+
         // Reverse servos that are necessary
 
     }
@@ -55,17 +61,22 @@ public class Intake {
     }
 
     public void setInnerRotation(double position){
-        diffLeft.setPosition(position);
-        diffRight.setPosition(position);
+        diffLeftPos = position;
+        diffRightPos = position;
+
+        diffLeft.setPosition(diffLeftPos - offset);
+        diffRight.setPosition(diffRightPos + offset);
 }
 
     public void setGarra(double position){
         garraIntake.setPosition(position);
     }
 
-    public void setMuneca(double position) {
-        diffLeft.setPosition(position);
-        diffRight.setPosition(1 - position);
+    public void setMuneca(double offset) {
+        this.offset = offset;
+
+        diffLeft.setPosition(diffLeftPos - offset);
+        diffRight.setPosition(diffRightPos + offset);
     }
 
     public void setSliders(double position){
@@ -78,15 +89,19 @@ public class Intake {
     }
 
     public Action setInnerRotationAction(double position){
-        return new DualServoAction(diffLeft, rotationRight, position, position);
+        diffLeftPos = position;
+        diffRightPos = position;
+        return new DualServoAction(diffLeft, diffRight, diffLeftPos - offset, diffRightPos + offset);
     }
 
     public Action setGarraAction(double position){
         return new ServoAction(garraIntake, position);
     }
 
-    public Action setMunecaAction(double position){
-        return new DualServoAction(diffLeft, rotationRight, position, 1-position);
+    public Action setMunecaAction(double offset){
+        this.offset = offset;
+
+        return new DualServoAction(diffLeft, diffRight, diffLeftPos - offset, diffRightPos + offset);
     }
 
     public Action setSlidersAction(double position){

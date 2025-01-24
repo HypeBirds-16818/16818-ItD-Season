@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -21,7 +22,7 @@ public class AutoTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Pose2d initialPose = new Pose2d(23.75, -63, Math.toRadians(90.00));
+        Pose2d initialPose = new Pose2d(8.74, -62.90, Math.toRadians(270.00));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         Outtake outake = new Outtake(hardwareMap);
@@ -31,44 +32,224 @@ public class AutoTest extends LinearOpMode {
         climber.init(hardwareMap);
         intake.init(hardwareMap);
 
-        TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(38.78, -12.78), Math.toRadians(90.00))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(47.74, -12.64))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(47.74, -60.30))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(47.74, -9.89))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(58.28, -9.89))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(58.71, -60.30))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(58.28, -12.64))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(62.90, -12.64))
-                .waitSeconds(1)
-                .strafeTo(new Vector2d(62.90, -60.30));
+        TrajectoryActionBuilder driveToFirstSample = drive.actionBuilder(initialPose)
+                .strafeTo(new Vector2d(1.95, -33.73));
 
+
+        TrajectoryActionBuilder moveAllSamples = driveToFirstSample.endTrajectory().fresh()
+                .splineToConstantHeading(new Vector2d(31.70, -62.90), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(36.76, -13.65))
+                .strafeToConstantHeading(new Vector2d(48.60, -13.94))
+                .strafeToConstantHeading(new Vector2d(48.75, -60.45))
+                .strafeToConstantHeading(new Vector2d(48.60, -9.17))
+                .strafeToConstantHeading(new Vector2d(57.99, -14.23))
+                .strafeToConstantHeading(new Vector2d(57.99, -60.16))
+                .strafeToConstantHeading(new Vector2d(57.99, -9.17))
+                .strafeToConstantHeading(new Vector2d(62.47, -9.32))
+                .strafeToConstantHeading(new Vector2d(62.32, -54.81))
+                .waitSeconds(2)
+                .strafeToConstantHeading(new Vector2d(36.32, -62.90));
+
+        TrajectoryActionBuilder driveToSecondSample = moveAllSamples.endTrajectory().fresh()
+                .strafeToConstantHeading(new Vector2d(3.83, -33.29));
+
+        TrajectoryActionBuilder firstReturn = driveToSecondSample.endTrajectory().fresh()
+                .splineToConstantHeading(new Vector2d(35.60, -61.17), Math.toRadians(270.00));
+
+        TrajectoryActionBuilder driveToThirdSample = firstReturn.endTrajectory().fresh()
+                .strafeToConstantHeading(new Vector2d(1.83, -33.29));
+
+        TrajectoryActionBuilder secondReturn = driveToThirdSample.endTrajectory().fresh()
+                .splineToConstantHeading(new Vector2d(35.60, -61.17), Math.toRadians(270.00));
+
+        TrajectoryActionBuilder driveToFourthSample = secondReturn.endTrajectory().fresh()
+                .strafeToConstantHeading(new Vector2d(-0.83, -33.29));
+
+        TrajectoryActionBuilder thirdReturn = driveToFourthSample.endTrajectory().fresh()
+                .splineToConstantHeading(new Vector2d(35.60, -61.17), Math.toRadians(270.00));
+
+        TrajectoryActionBuilder driveToFifthSample = thirdReturn.endTrajectory().fresh()
+                .strafeToConstantHeading(new Vector2d(-2.83, -33.29));
+
+        TrajectoryActionBuilder fourthReturn = driveToFifthSample.endTrajectory().fresh()
+                .splineToConstantHeading(new Vector2d(35.60, -61.17), Math.toRadians(270.00));
 
         waitForStart();
 
 
-        Actions.runBlocking(new SequentialAction(
+        Actions.runBlocking(new SequentialAction(climber.setTarget(TeleOp.CLIMBER_SLIGHTLY),
                 new ParallelAction(
+                        climber.updatePIDAction(),
+                        new SequentialAction(
                         //INIT
-                        outake.setBrazoAction(TeleOp.BRAZO_OUT_MEDIO),
-                        outake.setRotationAction(TeleOp.ROT_OUT_CERO),
-                        outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
-                        intake.setBrazoAction(TeleOp.BRAZO_IN_CERO),
-                        intake.setRotationAction(TeleOp.ROT_IN_CERO),
-                        intake.setMunecaAction(TeleOp.MUNECA_VER),
-                        intake.setGarraAction(TeleOp.GARRA_ABIERTA_I),
-                        intake.setTarget(0),
-                        climber.setTarget(-50)
-                ),
-                new SleepAction(1),
-                tab1.build()));
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN),
+                                outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
+                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
+                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
+
+                                intake.setSlidersAction(TeleOp.SLIDER_I_IN),
+                                intake.setRotationAction(TeleOp.BRAZO_IN_IDLE),
+                                intake.setGarraAction(TeleOp.GARRA_ABIERTA_I),
+                                intake.setInnerRotationAction(TeleOp.ROT_IN_DOWN),
+                                intake.setMunecaAction(TeleOp.MUNECA_I_HOR),
+
+                                // SPECIMEN OUTAKE
+                                new SleepAction(0.2),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
+                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
+                                new SleepAction(0.5),
+                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
+                                new SleepAction(0.2),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY),
+
+                                // MOVE TO FIRST SAMPLE
+                                driveToFirstSample.build(),
+
+                                new SleepAction(1),
+                                outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+
+                                // INIT OUTAKE TO MOVE SAMPLES IN FLOOR
+                                new ParallelAction(
+                                        moveAllSamples.build(),
+                                        new SequentialAction(
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN)
+                                        )
+                                ),
+                                new SleepAction(0.2),
+                                // CLOSE CLAW
+                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
+                                new SleepAction(0.2),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+
+                                // MOVE TO SECOND SAMPLE WHILE MOVING OUTAKE
+                                new ParallelAction(
+                                        driveToSecondSample.build(),
+                                        new SequentialAction(
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
+                                                new SleepAction(0.2),
+                                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY)
+                                        )
+                                ),
+                                new SleepAction(1),
+                                outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+
+                                // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
+                                new ParallelAction(
+                                        firstReturn.build(),
+                                        new SequentialAction(
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN)
+                                        )
+                                ),
+                                new SleepAction(0.2),
+                                // CLOSE CLAW
+                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
+                                new SleepAction(0.2),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+
+                                // MOVE TO THIRD SAMPLE WHILE MOVING OUTAKE
+                                new ParallelAction(
+                                        driveToThirdSample.build(),
+                                        new SequentialAction(
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
+                                                new SleepAction(0.2),
+                                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY)
+                                        )
+                                ),
+                                new SleepAction(1),
+                                outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+
+                                // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
+                                new ParallelAction(
+                                        secondReturn.build(),
+                                        new SequentialAction(
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN)
+                                        )
+                                ),
+                                new SleepAction(0.2),
+                                // CLOSE CLAW
+                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
+                                new SleepAction(0.2),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+
+                                // MOVE TO FOURTH SAMPLE WHILE MOVING OUTAKE
+                                new ParallelAction(
+                                        driveToFourthSample.build(),
+                                        new SequentialAction(
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
+                                                new SleepAction(0.2),
+                                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY)
+                                        )
+                                ),
+                                new SleepAction(1),
+                                outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+
+                                // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
+                                new ParallelAction(
+                                        thirdReturn.build(),
+                                        new SequentialAction(
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN)
+                                        )
+                                ),
+                                new SleepAction(0.2),
+                                // CLOSE CLAW
+                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
+                                new SleepAction(0.2),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+
+                                // MOVE TO FIFTH SAMPLE WHILE MOVING OUTAKE
+                                new ParallelAction(
+                                        driveToFifthSample.build(),
+                                        new SequentialAction(
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
+                                                new SleepAction(0.2),
+                                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY)
+                                        )
+                                ),
+                                new SleepAction(1),
+                                outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+
+                                // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
+                                new ParallelAction(
+                                        fourthReturn.build(),
+                                        new SequentialAction(
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
+                                                new SleepAction(0.5),
+                                                outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN)
+                                        )
+                                ),
+                                new SleepAction(0.2),
+                                // CLOSE CLAW
+                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
+                                new SleepAction(0.2),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200)
+                ))));
+
 
     }
 }

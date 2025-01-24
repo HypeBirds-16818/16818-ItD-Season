@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.mechanisms.Climber;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
@@ -43,12 +44,12 @@ public class TeleOp extends LinearOpMode {
 
     RobotState robotState = RobotState.PRE_IDLE;
 
-    // ROTACION INTERNA OUTAKE
-    public static double ROT_OUT_START = 0.97; // 90°
-    public static double ROT_OUT_OTTAKE = 0; // 45°
-    public static double ROT_OUT_TRANSFER = 0; // -45°
-    public static double ROT_OUT_OTLEAVE = 0; // ?
-    public static double ROT_OUT_PRETAKE = 0.97; // -90°
+    // ROTACION INTERNA OUTAKE (THEORIZED)
+    public static double ROT_OUT_START = 0.15; // 0° REF
+    public static double ROT_OUT_OTTAKE = 0.3; // 45°
+    public static double ROT_OUT_TRANSFER = 0.55; // 135°
+    public static double ROT_OUT_OTLEAVE = 0.55; // ?
+    public static double ROT_OUT_PRETAKE = 0.75; // 180°
 
     // SLIDER CLIMBER
     public static int CLIMBER_ABAJO = -50;
@@ -57,12 +58,12 @@ public class TeleOp extends LinearOpMode {
     public static int CLIMBER_S_BASKET = -3100;
     public static int CLIMBER_RUNG = -2100;
 
-    // BRAZO OUTAKE
-    public static double BRAZO_OUT_IDLE = 0.05; // ~30°
-    public static double BRAZO_OUT_SPECIMEN = 0.3; // ~35°
-    public static double BRAZO_OUT_PREINTAKE = 0.3; // ~95°
-    public static double BRAZO_OUT_TRANSFER = 0.7; // ~85°
-    public static double BRAZO_OUT_SCORING = 1; // ~225°
+    // BRAZO OUTAKE (THEORIZED)
+    public static double BRAZO_OUT_IDLE = 0.05; // ~30° 0 REF
+    public static double BRAZO_OUT_SPECIMEN = 0.02; // ~35° 5
+    public static double BRAZO_OUT_PREINTAKE = 0.26; // ~95° 65
+    public static double BRAZO_OUT_TRANSFER = 0.22; // ~85° 55
+    public static double BRAZO_OUT_SCORING = 0.78; // ~225° 195
 
     // GARRAS
     public static double GARRA_ABIERTA_I = 0.6;
@@ -70,29 +71,30 @@ public class TeleOp extends LinearOpMode {
     public static double GARRA_ABIERTA_O = 0;
     public static double GARRA_CERRADA_O = 0.19;
 
-    // SLIDER INTAKE
+    // SLIDER INTAKE (THEORIZED)
     public static double SLIDER_I_IN = 0;
-    public static double SLIDER_I_QUARTER = 0.25;
-    public static double SLIDER_I_HALF = 0.5;
-    public static double SLIDER_I_LASTQUARTER = 0.75;
-    public static double SLIDER_I_OUT = 1;
+    public static double SLIDER_I_QUARTER = 0.0875;
+    public static double SLIDER_I_HALF = 0.175;
+    public static double SLIDER_I_LASTQUARTER = 0.2625;
+    public static double SLIDER_I_OUT = 0.35;
 
-    // ROTACION INTERNA INTAKE
-    public static double ROT_IN_DOWN = 0.97; // 0°
-    public static double ROT_IN_TRANSFER = 0.645; // ~10°
-    public static double ROT_IN_PREINTAKE = 1; // 180°
+    // ROTACION INTERNA INTAKE (THEORIZED)
+    public static double ROT_IN_DOWN = 0.15; // 0°
+    public static double ROT_IN_TRANSFER = 0.19; // ~10°
+    public static double ROT_IN_PREINTAKE = 0.75; // 180°
 
-    // BRAZO INTAKE
-    public static double BRAZO_IN_IDLE = 1; // 270°
-    public static double BRAZO_IN_TRANSFER = 0.6; // ~135°
-    public static double BRAZO_IN_PREINTAKE = 0.13; // ~120°
-    public static double BRAZO_IN_INTAKING = 0.645; // ~90°
+    // BRAZO INTAKE (THEORIZED)
+    public static double BRAZO_IN_IDLE = 0; // 270° 0
+    public static double BRAZO_IN_TRANSFER = 0.45; // ~135° 135
+    public static double BRAZO_IN_PREINTAKE = 0.42; // ~120° 150
+    public static double BRAZO_IN_INTAKING = 0.6; // ~90° 180
 
-    // MUÑECAS
-    public static double MUNECA_O_VER = 0.65;
-    public static double MUNECA_O_HOR = 0.97;
-    public static double MUNECA_I_VER = 0.97;
-    public static double MUNECA_I_HOR = 0.97;
+    // MUÑECAS (OFFSETS < 0.15) (THEORIZED)
+    public static double MUNECA_O_VER = 0.075;
+    public static double MUNECA_O_HOR = 0;
+    public static double MUNECA_O_FLIPPED = 0.15;
+    public static double MUNECA_I_VER = 0.075;
+    public static double MUNECA_I_HOR = 0;
 
     // ETC
     public static double velocity = 0.5;
@@ -104,6 +106,7 @@ public class TeleOp extends LinearOpMode {
     private boolean open = false;
     private boolean openS = false;
     public boolean nuke = false;
+    private double offsetMuneca = 0;
 
     public String state = "None";
 
@@ -127,27 +130,28 @@ public class TeleOp extends LinearOpMode {
 
         while (opModeIsActive() && !isStopRequested()) {
 
-            Pose2d poseEstimate = drive.localizer.getPose();
+            double heading = drive.lazyImu.get().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-            Vector2d input = new Vector2d(
-                    -gamepad1.left_stick_y * velocity,
-                    -gamepad1.left_stick_x * velocity_lat
-            );
-            rotationAmount = drive.localizer.getPose().heading.
+            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(
+                    Math.cos(-heading)*-gamepad1.left_stick_y * velocity - Math.sin(-heading)*-gamepad1.left_stick_x * velocity_lat,
+                    Math.sin(-heading)*-gamepad1.left_stick_y * velocity + Math.cos(-heading)*-gamepad1.left_stick_x * velocity_lat
+            ),
+                    -gamepad1.right_stick_x
+            ));
 
-            drive.setDrivePowers(
-                    new PoseVelocity2d(
-                            new Vector2d(-gamepad1.left_stick_y * velocity, -gamepad1.left_stick_x * velocity_lat), -gamepad1.right_stick_x * velocity_rot
-                    )
-            );
+//            drive.setDrivePowers(
+//                    new PoseVelocity2d(
+//                            new Vector2d(-gamepad1.left_stick_y * velocity, -gamepad1.left_stick_x * velocity_lat), -gamepad1.right_stick_x * velocity_rot
+//                    )
+//            );
 
             switch(robotState){
                 case PRE_IDLE:
                     state = "PRE_IDLE";
-                    outake.setRotation(ROT_OUT_START);
-                    outake.setMuneca(MUNECA_O_HOR);
+                    outake.setRotation(BRAZO_OUT_IDLE);
+                    //outake.setMuneca(MUNECA_O_HOR);
                     outake.setGarra(GARRA_ABIERTA_O);
-                    outake.setInnerRotation(BRAZO_OUT_IDLE);
+                    outake.setInnerRotation(ROT_OUT_START);
 
                     intake.setSliders(SLIDER_I_IN);
                     intake.setRotation(BRAZO_IN_IDLE);
@@ -163,6 +167,8 @@ public class TeleOp extends LinearOpMode {
                 case IDLE:
                     if(timer.milliseconds() < 100){
                         gamepad1.rumble(200);
+                        outake.setMuneca(MUNECA_O_HOR);
+                        intake.setMuneca(MUNECA_I_HOR);
                     }
                     if(timer.seconds() < 1){
                         flag = false;
@@ -171,7 +177,6 @@ public class TeleOp extends LinearOpMode {
 
                         // servos de outake en posicion inicial
                         outake.setRotation(ROT_OUT_START);
-                        outake.setMuneca(MUNECA_O_HOR);
                         outake.setGarra(GARRA_ABIERTA_O);
                         outake.setInnerRotation(BRAZO_OUT_IDLE);
 
@@ -180,7 +185,7 @@ public class TeleOp extends LinearOpMode {
                         intake.setRotation(BRAZO_IN_IDLE);
                         intake.setGarra(GARRA_ABIERTA_I);
                         intake.setInnerRotation(ROT_IN_DOWN);
-                        intake.setMuneca(MUNECA_I_HOR);
+
 
                     }
 
@@ -200,7 +205,10 @@ public class TeleOp extends LinearOpMode {
 
                 case INTAKING:
                     state = "INTAKING";
-                    if(timer.milliseconds() < 500){
+                    if(timer.milliseconds() < 300){
+                        intake.setMuneca(MUNECA_I_HOR);
+                    }
+                    if(timer.milliseconds() < 500 && timer.milliseconds() > 50){
                         outake.setRotation(BRAZO_OUT_PREINTAKE);
                         outake.setInnerRotationAction(ROT_OUT_PRETAKE);
                         outake.setGarra(GARRA_ABIERTA_O);
@@ -209,7 +217,7 @@ public class TeleOp extends LinearOpMode {
                         intake.setRotation(BRAZO_IN_PREINTAKE);
                         intake.setGarra(GARRA_ABIERTA_I);
                         intake.setInnerRotation(ROT_IN_PREINTAKE);
-                        intake.setMuneca(MUNECA_I_HOR);
+
                         flag = true;
                     }
 
@@ -230,12 +238,14 @@ public class TeleOp extends LinearOpMode {
                         flag2 = true;
                     }
 
-                    if(gamepad1.dpad_right && flag && im != 0.49 && cd.milliseconds() > 200){
-                        im = im - 0.16;
+                    if(gamepad1.dpad_right && flag && offsetMuneca != 0.15 && cd.milliseconds() > 200){
+                        offsetMuneca = offsetMuneca + 0.025;
+                        intake.setMuneca(offsetMuneca);
                         cd.reset();
                     }
-                    if(gamepad1.dpad_left && flag && im != 0.97 && cd.milliseconds() > 200){
-                        im = im + 0.16;
+                    if(gamepad1.dpad_left && flag && offsetMuneca != 0 && cd.milliseconds() > 200){
+                        offsetMuneca = offsetMuneca - 0.025;
+                        intake.setMuneca(offsetMuneca);
                         cd.reset();
                     }
 
@@ -253,6 +263,7 @@ public class TeleOp extends LinearOpMode {
                 case CLOSE_INTAKE:
                     state = "CLOSE_INTAKE";
                     if(timer.milliseconds() < 200){
+                        intake.setMuneca(MUNECA_I_HOR);
                         open = true;
                     }
                     if(timer.milliseconds() > 200 && timer.milliseconds() < 400){
