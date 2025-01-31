@@ -8,16 +8,21 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class SimpleTestServo extends LinearOpMode {
     Servo garraOutake;
 
+    Servo garraOutake2;
+
     @Override
     public void runOpMode() throws InterruptedException {
-        garraOutake = hardwareMap.get(Servo.class, "brazoOuttake");
+        garraOutake = hardwareMap.get(Servo.class, "rotationRightO");
+        garraOutake2 = hardwareMap.get(Servo.class, "rotationLeftO");
+
 
         waitForStart();
 
         if (isStopRequested()) return;
 
         while (opModeIsActive() && !isStopRequested()) {
-            garraOutake.setPosition(0.5);
+            garraOutake.setPosition(0);
+            garraOutake2.setPosition(1);
         }
     }
 }

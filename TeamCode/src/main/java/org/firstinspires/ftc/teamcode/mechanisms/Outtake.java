@@ -24,11 +24,11 @@ public class Outtake {
     }
 
     public void init(HardwareMap hardwareMap){
-        rotationLeft = hardwareMap.get(Servo.class, "rotationLeft");
-        rotationRight = hardwareMap.get(Servo.class, "rotationRight");
+        rotationLeft = hardwareMap.get(Servo.class, "rotationLeftO");
+        rotationRight = hardwareMap.get(Servo.class, "rotationRightO");
         garraOuttake = hardwareMap.get(Servo.class, "garraOuttake");
-        diffLeft = hardwareMap.get(Servo.class, "diffLeft");
-        diffRight = hardwareMap.get(Servo.class, "diffRight");
+        diffLeft = hardwareMap.get(Servo.class, "diffLeftO");
+        diffRight = hardwareMap.get(Servo.class, "diffRightO");
 
 //        rotationLeft.setPosition(0);
 //        rotationRight.setPosition(0);
@@ -37,7 +37,25 @@ public class Outtake {
 //        diffRight.setPosition(0);
 
         // Reverse servos that are necessary
+        rotationLeft.setDirection(Servo.Direction.REVERSE);
+        diffRight.setDirection(Servo.Direction.REVERSE);
 
+
+    }
+
+    public void setRotationLeft(double position){
+        rotationLeft.setPosition(position);
+    }
+
+    public void setRotationRight(double position){
+        rotationRight.setPosition(position);
+    }
+
+    public void setDiffLeft(double position){
+        diffLeft.setPosition(position);
+    }
+    public void setDiffRight(double position){
+        diffRight.setPosition(position);
     }
 
     public void setRotation(double position){
@@ -60,18 +78,18 @@ public class Outtake {
     public void setMuneca(double offset) {
         this.offset = offset;
 
-        diffLeft.setPosition(diffLeftPos - offset);
-        diffRight.setPosition(diffRightPos + offset);
+        diffLeft.setPosition(diffLeftPos - this.offset);
+        diffRight.setPosition(diffRightPos + this.offset);
     }
 
     public Action setRotationAction(double position){
-        diffLeftPos = position;
-        diffRightPos = position;
-        return new DualServoAction(diffLeft, diffRight, diffLeftPos - offset, diffRightPos + offset);
+        return new DualServoAction(rotationLeft, rotationRight, position, position);
     }
 
     public Action setInnerRotationAction(double position){
-        return new DualServoAction(diffLeft, diffRight, position, position);
+        diffLeftPos = position;
+        diffRightPos = position;
+        return new DualServoAction(diffLeft, diffRight, diffLeftPos - offset, diffRightPos + offset);
     }
 
     public Action setGarraAction(double position){

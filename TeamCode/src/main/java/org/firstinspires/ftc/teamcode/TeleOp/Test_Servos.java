@@ -21,19 +21,30 @@ public class Test_Servos extends LinearOpMode {
     public static int in_rot = 0;
     public static int in_brazo = 0;
     public static int in_mun = 0;
-    public static int out_brazo = 0;
+    public static int out_brazo_l = 0;
+    public static int out_brazo_r = 0;
+    public static int out_diff_l = 0;
+    public static int out_diff_r = 0;
     public static int out_rot = 0;
     public static int out_garra = 0;
+    public static int out_mun = 0;
+    public static int out_inn = 0;
 
     public static int INTAKE_TARGET = 0;
     public static int OUTTAKE_TARGET = 0;
     public static double INTAKE_GARRA = 0;
     public static double INTAKE_ROTACION = 0;
     public static double INTAKE_BRAZO = 0;
-    public static double OUTAKE_BRAZO = 0;
+    public static double OUTAKE_BRAZO_L = 0;
+    public static double OUTAKE_BRAZO_R = 0;
     public static double OUTAKE_ROTACION = 0;
+    public static double OUTAKE_INNER = 0;
+
+    public static double OUTAKE_DIFF_L = 0;
+    public static double OUTAKE_DIFF_R = 0;
     public static double OUTAKE_GARRA = 0;
     public static double INTAKE_MUNECA = 0;
+    public static double OUTAKE_MUNECA = 0;
 
 
     @Override
@@ -45,9 +56,9 @@ public class Test_Servos extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime();
 
         waitForStart();
-//        intake.init();
-//        outake.init();
-//        climber.init();
+        intake.init(hardwareMap);
+        outake.init(hardwareMap);
+        climber.init(hardwareMap);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
@@ -63,7 +74,7 @@ public class Test_Servos extends LinearOpMode {
 
             switch (in_brazo){
                 case 1:
-                    intake.setBrazo(INTAKE_BRAZO);
+                    intake.setSliders(INTAKE_BRAZO);
                     break;
 
                 default:
@@ -101,9 +112,42 @@ public class Test_Servos extends LinearOpMode {
                 default:
                     break;
             }
-            switch (out_brazo){
+            switch (out_brazo_l){
                 case 1:
-                    outake.setBrazo(OUTAKE_BRAZO);
+                    outake.setRotationLeft(OUTAKE_BRAZO_L);
+                    break;
+
+                default:
+                    break;
+            }
+            switch (out_brazo_r){
+                case 1:
+                    outake.setRotationRight(OUTAKE_BRAZO_R);
+                    break;
+
+                default:
+                    break;
+            }
+            switch (out_inn){
+                case 1:
+                    outake.setInnerRotation(OUTAKE_INNER);
+                    break;
+
+                default:
+                    break;
+            }
+
+            switch (out_diff_l){
+                case 1:
+                    outake.setDiffLeft(OUTAKE_DIFF_L);
+                    break;
+
+                default:
+                    break;
+            }
+            switch (out_diff_r){
+                case 1:
+                    outake.setDiffRight(OUTAKE_DIFF_R);
                     break;
 
                 default:
@@ -112,6 +156,15 @@ public class Test_Servos extends LinearOpMode {
             switch (out_rot){
                 case 1:
                     outake.setRotation(OUTAKE_ROTACION);
+                    break;
+
+                default:
+                    break;
+            }
+
+            switch (out_mun){
+                case 1:
+                    outake.setMuneca(OUTAKE_MUNECA);
                     break;
 
                 default:
@@ -158,15 +211,7 @@ public class Test_Servos extends LinearOpMode {
                 }
             }
 
-            if(gamepad1.x){
-                if(out_brazo == 0){
-                    out_brazo = 1;
-                    active = "OUTAKE BRAZO";
-                } else {
-                    out_brazo = 0;
-                    active = "NONE";
-                }
-            }
+
 
             telemetry.addData("current servo: ", active);
             telemetry.update();

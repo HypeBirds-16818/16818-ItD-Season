@@ -37,10 +37,10 @@ public class Intake {
     public void init(HardwareMap hardwareMap){
         sliderLeft = hardwareMap.get(Servo.class, "sliderLeft");
         sliderRight = hardwareMap.get(Servo.class, "sliderRight");
-        rotationLeft = hardwareMap.get(Servo.class, "rotationLeft");
-        rotationRight = hardwareMap.get(Servo.class, "rotationRight");
-        diffLeft = hardwareMap.get(Servo.class, "diffLeft");
-        diffRight = hardwareMap.get(Servo.class, "diffRight");
+        rotationLeft = hardwareMap.get(Servo.class, "rotationLeftI");
+        rotationRight = hardwareMap.get(Servo.class, "rotationRightI");
+        diffLeft = hardwareMap.get(Servo.class, "diffLeftI");
+        diffRight = hardwareMap.get(Servo.class, "diffRightI");
         garraIntake = hardwareMap.get(Servo.class, "garraIntake");
 
 //        sliderLeft.setPosition(0);
@@ -52,6 +52,7 @@ public class Intake {
 
 
         // Reverse servos that are necessary
+        sliderRight.setDirection(Servo.Direction.REVERSE);
 
     }
 

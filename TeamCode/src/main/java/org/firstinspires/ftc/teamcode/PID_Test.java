@@ -25,7 +25,7 @@ public class PID_Test extends OpMode {
 
     private DcMotorEx motor1;
     private DcMotorEx motor2;
-    private DcMotorEx piston;
+    //private DcMotorEx piston;
 
     @Override
     public void init() {
@@ -34,7 +34,7 @@ public class PID_Test extends OpMode {
 
         motor1 = hardwareMap.get(DcMotorEx.class, "motor1");
         motor2 = hardwareMap.get(DcMotorEx.class, "motor2");
-        piston = hardwareMap.get(DcMotorEx.class, "piston");
+        //piston = hardwareMap.get(DcMotorEx.class, "piston");
 
         motor2.setDirection(DcMotorSimple.Direction.REVERSE);
         motor1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -61,16 +61,7 @@ public class PID_Test extends OpMode {
         motor1.setPower(power);
         motor2.setPower(power);
 
-        if (gamepad1.right_bumper){
-            pistonpw = 0.5;
-        }
-        if (gamepad1.left_bumper){
-            pistonpw = -0.5;
-        }
-        if (gamepad1.a){
-            pistonpw = 0;
-        }
-        piston.setPower(pistonpw);
+
 
         telemetry.addData("pos 1", motor1pos);
         telemetry.addData("pos 2", motor1pos);

@@ -31,24 +31,29 @@ public class AutoTest extends LinearOpMode {
 
         climber.init(hardwareMap);
         intake.init(hardwareMap);
+        outake.init(hardwareMap);
 
-        TrajectoryActionBuilder driveToFirstSample = drive.actionBuilder(initialPose)
+        TrajectoryActionBuilder moveCentimeter = drive.actionBuilder(initialPose)
+                .strafeTo(new Vector2d(8.74, -58.90));
+
+        TrajectoryActionBuilder driveToFirstSample = moveCentimeter.endTrajectory().fresh()
                 .strafeTo(new Vector2d(1.95, -33.73));
 
 
         TrajectoryActionBuilder moveAllSamples = driveToFirstSample.endTrajectory().fresh()
-                .splineToConstantHeading(new Vector2d(31.70, -62.90), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(31.70, -62.90))
                 .strafeToConstantHeading(new Vector2d(36.76, -13.65))
-                .strafeToConstantHeading(new Vector2d(48.60, -13.94))
-                .strafeToConstantHeading(new Vector2d(48.75, -60.45))
-                .strafeToConstantHeading(new Vector2d(48.60, -9.17))
-                .strafeToConstantHeading(new Vector2d(57.99, -14.23))
-                .strafeToConstantHeading(new Vector2d(57.99, -60.16))
-                .strafeToConstantHeading(new Vector2d(57.99, -9.17))
-                .strafeToConstantHeading(new Vector2d(62.47, -9.32))
-                .strafeToConstantHeading(new Vector2d(62.32, -54.81))
+                .strafeToConstantHeading(new Vector2d(46.60, -13.94))
+                .strafeToConstantHeading(new Vector2d(46.75, -60.45))
+                .strafeToConstantHeading(new Vector2d(46.60, -9.17))
+                .strafeToConstantHeading(new Vector2d(51.99, -14.23))
+                .strafeToConstantHeading(new Vector2d(51.99, -60.16))
+                .strafeToConstantHeading(new Vector2d(51.99, -9.17))
+                .strafeToConstantHeading(new Vector2d(58.9, -9.32))
+                .strafeToConstantHeading(new Vector2d(58.9, -54.81))
+                .strafeToConstantHeading(new Vector2d(55.9, -50.81))
                 .waitSeconds(2)
-                .strafeToConstantHeading(new Vector2d(36.32, -62.90));
+                .strafeToConstantHeading(new Vector2d(36.32, -64.90));
 
         TrajectoryActionBuilder driveToSecondSample = moveAllSamples.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(3.83, -33.29));
@@ -74,15 +79,20 @@ public class AutoTest extends LinearOpMode {
         TrajectoryActionBuilder fourthReturn = driveToFifthSample.endTrajectory().fresh()
                 .splineToConstantHeading(new Vector2d(35.60, -61.17), Math.toRadians(270.00));
 
+
+
         waitForStart();
 
 
-        Actions.runBlocking(new SequentialAction(climber.setTarget(TeleOp.CLIMBER_SLIGHTLY),
+        Actions.runBlocking(new SequentialAction(climber.setTarget(30),
                 new ParallelAction(
                         climber.updatePIDAction(),
                         new SequentialAction(
+                                moveCentimeter.build(),
+                                new SleepAction(0.7),
                         //INIT
-                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN),
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN-0.2),
+                                new SleepAction(0.6),
                                 outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
                                 outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
@@ -94,19 +104,19 @@ public class AutoTest extends LinearOpMode {
                                 intake.setMunecaAction(TeleOp.MUNECA_I_HOR),
 
                                 // SPECIMEN OUTAKE
-                                new SleepAction(0.2),
-                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+                                new SleepAction(0.5),
+                                climber.setTarget(100),
                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
-                                new SleepAction(0.5),
+                                new SleepAction(1),
                                 outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
                                 new SleepAction(0.2),
-                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY),
+                                climber.setTarget(5),
 
                                 // MOVE TO FIRST SAMPLE
                                 driveToFirstSample.build(),
 
-                                new SleepAction(1),
+                                new SleepAction(0.4), // optimize
                                 outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
 
                                 // INIT OUTAKE TO MOVE SAMPLES IN FLOOR
@@ -122,22 +132,25 @@ public class AutoTest extends LinearOpMode {
                                 new SleepAction(0.2),
                                 // CLOSE CLAW
                                 outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
-                                new SleepAction(0.2),
-                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+                                new SleepAction(0.4),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY+30),
 
                                 // MOVE TO SECOND SAMPLE WHILE MOVING OUTAKE
                                 new ParallelAction(
-                                        driveToSecondSample.build(),
+                                        new SequentialAction(
+                                                new SleepAction(0.3),
+                                                driveToSecondSample.build()
+                                        ),
                                         new SequentialAction(
                                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
                                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
-                                                new SleepAction(0.5),
+                                                new SleepAction(1),
                                                 outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
                                                 new SleepAction(0.2),
-                                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY)
+                                                climber.setTarget(5)
                                         )
                                 ),
-                                new SleepAction(1),
+                                new SleepAction(0.4),
                                 outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
 
                                 // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
@@ -153,8 +166,8 @@ public class AutoTest extends LinearOpMode {
                                 new SleepAction(0.2),
                                 // CLOSE CLAW
                                 outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
-                                new SleepAction(0.2),
-                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+                                new SleepAction(0.4),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY + 30),
 
                                 // MOVE TO THIRD SAMPLE WHILE MOVING OUTAKE
                                 new ParallelAction(
@@ -165,10 +178,10 @@ public class AutoTest extends LinearOpMode {
                                                 new SleepAction(0.5),
                                                 outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
                                                 new SleepAction(0.2),
-                                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY)
+                                                climber.setTarget(5)
                                         )
                                 ),
-                                new SleepAction(1),
+                                new SleepAction(0.4),
                                 outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
 
                                 // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
@@ -184,8 +197,8 @@ public class AutoTest extends LinearOpMode {
                                 new SleepAction(0.2),
                                 // CLOSE CLAW
                                 outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
-                                new SleepAction(0.2),
-                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200),
+                                new SleepAction(0.4),
+                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY+30),
 
                                 // MOVE TO FOURTH SAMPLE WHILE MOVING OUTAKE
                                 new ParallelAction(
