@@ -17,12 +17,12 @@ import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Outtake;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp;
 
-@Autonomous(name = "SkibidiSigmaPomni")
-public class AutoTest extends LinearOpMode {
+@Autonomous(name = "F O R T N I T E")
+public class AutoSamples extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Pose2d initialPose = new Pose2d(8.74, -62.90, Math.toRadians(270.00));
+        Pose2d initialPose = new Pose2d(-14.74, -62.90, Math.toRadians(270.00));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         Outtake outake = new Outtake(hardwareMap);
@@ -34,50 +34,28 @@ public class AutoTest extends LinearOpMode {
         outake.init(hardwareMap);
 
         TrajectoryActionBuilder moveCentimeter = drive.actionBuilder(initialPose)
-                .strafeTo(new Vector2d(8.74, -58.90));
+                .strafeTo(new Vector2d(-14.74, -58.90));
 
         TrajectoryActionBuilder driveToFirstSample = moveCentimeter.endTrajectory().fresh()
-                .strafeTo(new Vector2d(1.95, -31.73));
+                .strafeToConstantHeading(new Vector2d(-11.95, -31.73));
 
 
-        TrajectoryActionBuilder moveAllSamples = driveToFirstSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(31.70, -62.90))
-                .strafeToConstantHeading(new Vector2d(36.76, -13.65))
-                .strafeToConstantHeading(new Vector2d(46.60, -13.94))
-                .strafeToConstantHeading(new Vector2d(46.75, -60.45))
-                .strafeToConstantHeading(new Vector2d(46.60, -9.17))
-                .strafeToConstantHeading(new Vector2d(51.99, -14.23))
-                .strafeToConstantHeading(new Vector2d(51.99, -60.16))
-                .strafeToConstantHeading(new Vector2d(51.99, -9.17))
-                .strafeToConstantHeading(new Vector2d(58.9, -9.32))
-                .strafeToConstantHeading(new Vector2d(58.9, -54.81))
-                .strafeToConstantHeading(new Vector2d(55.9, -50.81))
-                .waitSeconds(1)
-                .strafeToConstantHeading(new Vector2d(36.32, -64.90));
 
-        TrajectoryActionBuilder driveToSecondSample = moveAllSamples.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(3.83, -32.29));
+        TrajectoryActionBuilder driveToYellow = driveToFirstSample.endTrajectory().fresh()
+                .strafeToConstantHeading(new Vector2d(-31.70, -58.90))
+                .turnTo(Math.toRadians(180))
+                .strafeToConstantHeading(new Vector2d(-49.1, -37.3));
 
-        TrajectoryActionBuilder firstReturn = driveToSecondSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(36.60, -61.17));
 
-        TrajectoryActionBuilder driveToThirdSample = firstReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(1.83, -33.29));
+        TrajectoryActionBuilder driveToBasket = driveToYellow.endTrajectory().fresh()
+                .turnTo(Math.toRadians(235))
+                .strafeToConstantHeading(new Vector2d(-61.5, -61.5));
 
-        TrajectoryActionBuilder secondReturn = driveToThirdSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(36.60, -61.17));
+        TrajectoryActionBuilder park = driveToBasket.endTrajectory().fresh()
+                        .strafeToConstantHeading(new Vector2d(-33.67, -10))
+                                .turnTo(0)
+                .strafeToConstantHeading(new Vector2d(-23.93, -10));
 
-        TrajectoryActionBuilder driveToFourthSample = secondReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(-0.83, -33.29));
-
-        TrajectoryActionBuilder thirdReturn = driveToFourthSample.endTrajectory().fresh()
-                .splineToConstantHeading(new Vector2d(36.60, -61.17), Math.toRadians(270.00));
-
-        TrajectoryActionBuilder driveToFifthSample = thirdReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(-2.83, -33.29));
-
-        TrajectoryActionBuilder fourthReturn = driveToFifthSample.endTrajectory().fresh()
-                .splineToConstantHeading(new Vector2d(36.60, -61.17), Math.toRadians(270.00));
 
 
 
@@ -87,11 +65,11 @@ public class AutoTest extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(climber.setTarget(30), intake.setTargetAction(-40),
                 new ParallelAction(
                         climber.updatePIDAction(),
-                                intake.updatePIDAction(),
+                        intake.updatePIDAction(),
                         new SequentialAction(
                                 moveCentimeter.build(),
                                 new SleepAction(0.7),
-                        //INIT
+                                //INIT
                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN-0.2),
                                 new SleepAction(0.6),
                                 outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
@@ -120,14 +98,23 @@ public class AutoTest extends LinearOpMode {
 
                                 // INIT OUTAKE TO MOVE SAMPLES IN FLOOR
                                 new ParallelAction(
-                                        moveAllSamples.build(),
+                                        driveToYellow.build(),
                                         new SequentialAction(
-                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
+                                                outake.setRotationAction(TeleOp.BRAZO_OUT_PREINTAKE),
+                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_PRETAKE),
+                                                outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
                                                 new SleepAction(0.5),
-                                                outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
-                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN-0.01)
+                                                intake.setRotationAction(TeleOp.BRAZO_IN_PREINTAKE),
+                                                intake.setGarraAction(TeleOp.GARRA_ABIERTA_I),
+                                                intake.setInnerRotationAction(TeleOp.ROT_IN_PREINTAKE)
                                         )
-                                )
+                                ),
+                                new SleepAction(0.5,)
+                                intake.setMunecaAction(TeleOp.MUNECA_I_HOR),
+                                intake.setGarraAction(TeleOp.GARRA_ABIERTA_I),
+                                 e
+
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING)
 //                                new SleepAction(0.2),
 //                                // CLOSE CLAW
 //                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
@@ -260,7 +247,7 @@ public class AutoTest extends LinearOpMode {
 //                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
 //                                new SleepAction(0.2),
 //                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200)
-                ))));
+                        ))));
 
 
     }

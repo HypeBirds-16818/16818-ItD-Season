@@ -17,12 +17,12 @@ import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Outtake;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp;
 
-@Autonomous(name = "SkibidiSigmaPomni")
-public class AutoTest extends LinearOpMode {
+@Autonomous(name = "F O R T N I T E")
+public class AutoMinerva extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Pose2d initialPose = new Pose2d(8.74, -62.90, Math.toRadians(270.00));
+        Pose2d initialPose = new Pose2d(-14.74, -62.90, Math.toRadians(270.00));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         Outtake outake = new Outtake(hardwareMap);
@@ -34,26 +34,19 @@ public class AutoTest extends LinearOpMode {
         outake.init(hardwareMap);
 
         TrajectoryActionBuilder moveCentimeter = drive.actionBuilder(initialPose)
-                .strafeTo(new Vector2d(8.74, -58.90));
+                .strafeTo(new Vector2d(-14.74, -58.90));
 
         TrajectoryActionBuilder driveToFirstSample = moveCentimeter.endTrajectory().fresh()
-                .strafeTo(new Vector2d(1.95, -31.73));
+                .strafeToConstantHeading(new Vector2d(-11.95, -31.73));
+
 
 
         TrajectoryActionBuilder moveAllSamples = driveToFirstSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(31.70, -62.90))
-                .strafeToConstantHeading(new Vector2d(36.76, -13.65))
-                .strafeToConstantHeading(new Vector2d(46.60, -13.94))
-                .strafeToConstantHeading(new Vector2d(46.75, -60.45))
-                .strafeToConstantHeading(new Vector2d(46.60, -9.17))
-                .strafeToConstantHeading(new Vector2d(51.99, -14.23))
-                .strafeToConstantHeading(new Vector2d(51.99, -60.16))
-                .strafeToConstantHeading(new Vector2d(51.99, -9.17))
-                .strafeToConstantHeading(new Vector2d(58.9, -9.32))
-                .strafeToConstantHeading(new Vector2d(58.9, -54.81))
-                .strafeToConstantHeading(new Vector2d(55.9, -50.81))
-                .waitSeconds(1)
-                .strafeToConstantHeading(new Vector2d(36.32, -64.90));
+                .strafeToConstantHeading(new Vector2d(-31.70, -58.90))
+                .strafeToConstantHeading(new Vector2d(-37.64, -10.23))
+                .turnTo(0)
+                .strafeToConstantHeading(new Vector2d(-23.93, -10.23));
+
 
         TrajectoryActionBuilder driveToSecondSample = moveAllSamples.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(3.83, -32.29));
@@ -87,11 +80,11 @@ public class AutoTest extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(climber.setTarget(30), intake.setTargetAction(-40),
                 new ParallelAction(
                         climber.updatePIDAction(),
-                                intake.updatePIDAction(),
+                        intake.updatePIDAction(),
                         new SequentialAction(
                                 moveCentimeter.build(),
                                 new SleepAction(0.7),
-                        //INIT
+                                //INIT
                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN-0.2),
                                 new SleepAction(0.6),
                                 outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
@@ -127,7 +120,8 @@ public class AutoTest extends LinearOpMode {
                                                 outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
                                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN-0.01)
                                         )
-                                )
+                                ),
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING)
 //                                new SleepAction(0.2),
 //                                // CLOSE CLAW
 //                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
@@ -260,7 +254,7 @@ public class AutoTest extends LinearOpMode {
 //                                outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
 //                                new SleepAction(0.2),
 //                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY-200)
-                ))));
+                        ))));
 
 
     }

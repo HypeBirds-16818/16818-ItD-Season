@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -17,9 +18,10 @@ import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Outtake;
 
 @Config
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOpToluca")
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOpFerreria")
 public class TeleOp extends LinearOpMode {
     public static int targetOutake = 0;
+    public static int targetIntake = 0;
 
     private enum RobotState{
         PRE_IDLE,
@@ -46,28 +48,28 @@ public class TeleOp extends LinearOpMode {
 
     // ROTACION INTERNA OUTAKE (THEORIZED)
     public static double ROT_OUT_START = 0.22; // 0° REF
-    public static double ROT_OUT_OTTAKE = 0.22; // 45°
-    public static double ROT_OUT_TRANSFER = 0.55; // 135°
+    public static double ROT_OUT_OTTAKE = 0.25; // 45°
+    public static double ROT_OUT_TRANSFER = 0.6; // 135°
     public static double ROT_OUT_OTLEAVE = 0.55; // ?
     public static double ROT_OUT_PRETAKE = 0.75; // 180°
 
     // SLIDER CLIMBER
-    public static int CLIMBER_ABAJO = 50;
-    public static int CLIMBER_SLIGHTLY = 50; // FOR SPECIMEN INTAKEING
+    public static int CLIMBER_ABAJO = 20;
+    public static int CLIMBER_SLIGHTLY = 20; // FOR SPECIMEN INTAKEING
     public static int CLIMBER_F_BASKET = 1000;
     public static int CLIMBER_S_BASKET = 3100;
     public static int CLIMBER_RUNG = 2100;
 
     // BRAZO OUTAKE (THEORIZED)
     public static double BRAZO_OUT_IDLE = 0.95; // ~30° 0 REF
-    public static double BRAZO_OUT_SPECIMEN = 1; // ~35° 5
-    public static double BRAZO_OUT_PREINTAKE = 0.26; // ~95° 65
-    public static double BRAZO_OUT_TRANSFER = 0.9; // ~85° 55
+    public static double BRAZO_OUT_SPECIMEN = 0.92; // ~35° 5
+    public static double BRAZO_OUT_PREINTAKE = 0.75; // ~95° 65
+    public static double BRAZO_OUT_TRANSFER = 0.81; // ~85° 55
     public static double BRAZO_OUT_SCORING = 0.21; // ~225° 195
 
     // GARRAS
-    public static double GARRA_ABIERTA_I = 0.6;
-    public static double GARRA_CERRADA_I = 0.99;
+    public static double GARRA_ABIERTA_I = 0.9;
+    public static double GARRA_CERRADA_I = 0.12;
     public static double GARRA_ABIERTA_O = 0.9;
     public static double GARRA_CERRADA_O = 0.54;
 
@@ -79,15 +81,15 @@ public class TeleOp extends LinearOpMode {
     public static double SLIDER_I_OUT = 0.35;
 
     // ROTACION INTERNA INTAKE (THEORIZED)
-    public static double ROT_IN_DOWN = 0.15; // 0°
-    public static double ROT_IN_TRANSFER = 0.19; // ~10°
-    public static double ROT_IN_PREINTAKE = 0.75; // 180°
+    public static double ROT_IN_DOWN = 0.442; // 0°
+    public static double ROT_IN_TRANSFER = 0.455; // ~10°
+    public static double ROT_IN_PREINTAKE = 0.56; // 180°
 
     // BRAZO INTAKE (THEORIZED)
-    public static double BRAZO_IN_IDLE = 0; // 270° 0
+    public static double BRAZO_IN_IDLE = 0.57; // 270° 0
     public static double BRAZO_IN_TRANSFER = 0.45; // ~135° 135
-    public static double BRAZO_IN_PREINTAKE = 0.42; // ~120° 150
-    public static double BRAZO_IN_INTAKING = 0.6; // ~90° 180
+    public static double BRAZO_IN_PREINTAKE = 0.2; // ~120° 150
+    public static double BRAZO_IN_INTAKING = 0.05; // ~90° 180
 
     // MUÑECAS (OFFSETS < 0.15) (THEORIZED)
     public static double MUNECA_O_VER = 0;
@@ -130,20 +132,20 @@ public class TeleOp extends LinearOpMode {
 
         while (opModeIsActive() && !isStopRequested()) {
 
-            double heading = drive.lazyImu.get().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//            double heading = drive.lazyImu.get().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//
+//            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(
+//                    Math.cos(-heading)*-gamepad1.left_stick_y * velocity - Math.sin(-heading)*-gamepad1.left_stick_x * velocity_lat,
+//                    Math.sin(-heading)*-gamepad1.left_stick_y * velocity + Math.cos(-heading)*-gamepad1.left_stick_x * velocity_lat
+//            ),
+//                    -gamepad1.right_stick_x
+//            ));
 
-            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(
-                    Math.cos(-heading)*-gamepad1.left_stick_y * velocity - Math.sin(-heading)*-gamepad1.left_stick_x * velocity_lat,
-                    Math.sin(-heading)*-gamepad1.left_stick_y * velocity + Math.cos(-heading)*-gamepad1.left_stick_x * velocity_lat
-            ),
-                    -gamepad1.right_stick_x
-            ));
-
-//            drive.setDrivePowers(
-//                    new PoseVelocity2d(
-//                            new Vector2d(-gamepad1.left_stick_y * velocity, -gamepad1.left_stick_x * velocity_lat), -gamepad1.right_stick_x * velocity_rot
-//                    )
-//            );
+            drive.setDrivePowers(
+                    new PoseVelocity2d(
+                            new Vector2d(-gamepad1.left_stick_y * velocity, -gamepad1.left_stick_x * velocity_lat), -gamepad1.right_stick_x * velocity_rot
+                    )
+            );
 
             switch(robotState){
                 case PRE_IDLE:
@@ -153,13 +155,13 @@ public class TeleOp extends LinearOpMode {
                     outake.setGarra(GARRA_ABIERTA_O);
                     outake.setInnerRotation(ROT_OUT_START);
 
-                    intake.setSliders(SLIDER_I_IN);
+                    //intake.setSliders(SLIDER_I_IN);
                     intake.setRotation(BRAZO_IN_IDLE);
                     intake.setGarra(GARRA_ABIERTA_I);
                     intake.setInnerRotation(ROT_IN_DOWN);
                     intake.setMuneca(MUNECA_I_HOR);
 
-                    targetOutake = 50;
+                    targetOutake = 20;
                     timer.reset();
                     robotState = RobotState.IDLE;
                     break;
@@ -181,7 +183,8 @@ public class TeleOp extends LinearOpMode {
                         outake.setInnerRotation(ROT_OUT_START);
 
                         // servos de intake en posicion inicial
-                        intake.setSliders(SLIDER_I_IN);
+                        //intake.setSliders(SLIDER_I_IN);
+                        intake.setTarget(-100);
                         intake.setRotation(BRAZO_IN_IDLE);
                         intake.setGarra(GARRA_ABIERTA_I);
                         intake.setInnerRotation(ROT_IN_DOWN);
@@ -189,8 +192,16 @@ public class TeleOp extends LinearOpMode {
 
                     }
 
+                    if(timer.milliseconds() > 900 && timer.milliseconds() < 1000){
+                        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                        intake.setTarget(0);
+                    }
+
                     if(timer.seconds() > 1){
-                        targetOutake = 50;
+                        if(!nuke){
+                            targetOutake = 20;
+                        }
+
                         if(gamepad1.a){
                             robotState = RobotState.INTAKING;
                             timer.reset();
@@ -222,19 +233,19 @@ public class TeleOp extends LinearOpMode {
                     }
 
                     if(gamepad1.dpad_up){
-                        intake.setSliders(SLIDER_I_OUT);
+                        intake.setTarget(targetIntake + 50);
                         flag2 = true;
                     }
                     if(gamepad1.dpad_right){
-                        intake.setSliders(SLIDER_I_LASTQUARTER);
+                        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         flag2 = true;
                     }
                     if(gamepad1.dpad_left){
-                        intake.setSliders(SLIDER_I_HALF);
+                        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         flag2 = true;
                     }
                     if(gamepad1.dpad_down){
-                        intake.setSliders(SLIDER_I_QUARTER);
+                        intake.setTarget(targetIntake - 50);
                         flag2 = true;
                     }
 
@@ -264,6 +275,7 @@ public class TeleOp extends LinearOpMode {
                     state = "CLOSE_INTAKE";
                     if(timer.milliseconds() < 200){
                         intake.setMuneca(MUNECA_I_HOR);
+                        intake.setGarra(GARRA_ABIERTA_I);
                         open = true;
                     }
                     if(timer.milliseconds() > 200 && timer.milliseconds() < 400){
@@ -299,11 +311,18 @@ public class TeleOp extends LinearOpMode {
                 case PRE_TRANSFER:
                     state = "PRE_TRANSFER";
                     if(timer.milliseconds() < 200){
-                        intake.setSliders(SLIDER_I_IN);
+                        intake.setTarget(-100);
                         intake.setRotation(BRAZO_IN_PREINTAKE);
                     }
 
-                    if(timer.milliseconds() > 200){
+                    if(timer.milliseconds() > 200 && timer.milliseconds() < 250){
+                        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    }
+
+                    if(timer.milliseconds() > 700){
+
+                        intake.setTarget(-70);
+
                         if(gamepad1.a){
                             robotState = RobotState.TRANSFER;
                             timer.reset();
@@ -326,7 +345,7 @@ public class TeleOp extends LinearOpMode {
                     }
 
                     if(timer.seconds() > 4){
-                        robotState = RobotState.PRE_TRANSFER;
+                        robotState = RobotState.IDLE    ;
                         timer.reset();
                     }
                     break;
@@ -335,7 +354,7 @@ public class TeleOp extends LinearOpMode {
                     state = "TRANSFER";
                     if(timer.milliseconds() < 500){
                         // gira intake
-                        intake.setRotation(BRAZO_IN_INTAKING);
+                        intake.setRotation(BRAZO_IN_PREINTAKE);
                         intake.setInnerRotation(ROT_IN_TRANSFER);
                     }
                     if(timer.milliseconds() > 500 && timer.milliseconds() < 1000){
@@ -353,7 +372,7 @@ public class TeleOp extends LinearOpMode {
                         outake.setRotation(BRAZO_OUT_SCORING);
 
                         // servos de intake en posicion inicial
-                        intake.setSliders(SLIDER_I_IN);
+                        intake.setTarget(0);
                         intake.setRotation(BRAZO_IN_IDLE);
                         intake.setGarra(GARRA_ABIERTA_I);
                         intake.setInnerRotation(ROT_IN_DOWN);
@@ -378,7 +397,9 @@ public class TeleOp extends LinearOpMode {
                     }
 
                     if(timer.milliseconds() > 200){
-                        targetOutake = CLIMBER_ABAJO;
+                        if(!nuke){
+                            targetOutake = CLIMBER_ABAJO;
+                        }
 
                         if(gamepad2.right_bumper){
                             robotState = RobotState.RAISE1;
@@ -440,7 +461,9 @@ public class TeleOp extends LinearOpMode {
                 case SPECIMING:
                     state = "SPECIMEN";
                     if(timer.milliseconds() < 200){
-                        targetOutake = CLIMBER_SLIGHTLY;
+                        if(!nuke){
+                            targetOutake = 20;
+                        }
                     }
                     if(timer.milliseconds() > 200 && timer.milliseconds() < 300){
                         outake.setRotation(BRAZO_OUT_SPECIMEN);
@@ -465,7 +488,16 @@ public class TeleOp extends LinearOpMode {
                     if(timer.milliseconds() < 200){
                         openS = true;
                     }
-                    targetOutake = CLIMBER_SLIGHTLY;
+                    if(!nuke && timer.milliseconds() < 200){
+                        targetOutake = 20;
+                    }
+
+                    if(gamepad2.dpad_up){
+                        targetOutake = targetOutake + 2;
+                    }
+                    if(gamepad2.dpad_down){
+                        targetOutake = targetOutake - 2;
+                    }
 
                     if(gamepad1.a && cd.milliseconds() > 200){
                         if(openS){
@@ -495,7 +527,9 @@ public class TeleOp extends LinearOpMode {
                 case PRE_OUTAKING_S:
                     state = "PRE_OUTAKING_S";
                     // levanta un poquito el climber
-                    targetOutake = CLIMBER_SLIGHTLY-400;
+                    if(!nuke){
+                        targetOutake = CLIMBER_SLIGHTLY+100;
+                    }
                     if(timer.milliseconds() > 200){
                         if(gamepad1.x){
                             robotState = RobotState.OUTAKING_S;
@@ -519,7 +553,10 @@ public class TeleOp extends LinearOpMode {
                     }
 
                     if(timer.milliseconds() > 200){
-                        targetOutake = CLIMBER_ABAJO;
+                        if(!nuke){
+                            targetOutake = CLIMBER_ABAJO;
+                        }
+                        outake.setMuneca(MUNECA_O_FLIPPED);
                         if(gamepad2.right_bumper){
                             robotState = RobotState.DROPPING_S;
                             timer.reset();
@@ -595,12 +632,12 @@ public class TeleOp extends LinearOpMode {
             }
             if(gamepad2.dpad_up && nuke){
                 if(cd.milliseconds() > 200 && targetOutake != 3000){
-                    targetOutake = targetOutake - 1000;
+                    targetOutake = targetOutake + 1000;
                     cd.reset();
                 }
             }
             if(gamepad2.dpad_down && nuke){
-                targetOutake = -1800;
+                targetOutake = 1800;
             }
 
 
@@ -608,9 +645,12 @@ public class TeleOp extends LinearOpMode {
 
             drive.updatePoseEstimate();
             climber.updatePID(targetOutake);
+            intake.updatePID();
 
             telemetry.addData("current state: ", state);
             telemetry.addData("Climber unlocked: ", nuke);
+            telemetry.addData("Intake target: ", targetIntake);
+            telemetry.addData("Intake position: ", intake.getIntakePosition());
             telemetry.update();
 
         }

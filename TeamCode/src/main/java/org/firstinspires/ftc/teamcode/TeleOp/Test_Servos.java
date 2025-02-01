@@ -29,6 +29,7 @@ public class Test_Servos extends LinearOpMode {
     public static int out_garra = 0;
     public static int out_mun = 0;
     public static int out_inn = 0;
+    public static int in_slider = 0;
 
     public static int INTAKE_TARGET = 0;
     public static int OUTTAKE_TARGET = 0;
@@ -44,6 +45,7 @@ public class Test_Servos extends LinearOpMode {
     public static double OUTAKE_DIFF_R = 0;
     public static double OUTAKE_GARRA = 0;
     public static double INTAKE_MUNECA = 0;
+    public static double INTAKE_SLIDER = 0;
     public static double OUTAKE_MUNECA = 0;
 
 
@@ -72,9 +74,17 @@ public class Test_Servos extends LinearOpMode {
 //                    )
 //            );
 
+            switch (in_slider){
+                case 1:
+                    intake.setSliders(INTAKE_SLIDER);
+                    break;
+
+                default:
+                    break;
+            }
             switch (in_brazo){
                 case 1:
-                    intake.setSliders(INTAKE_BRAZO);
+                    intake.setRotation( INTAKE_BRAZO);
                     break;
 
                 default:
@@ -82,7 +92,7 @@ public class Test_Servos extends LinearOpMode {
             }
             switch (in_rot){
                 case 1:
-                    intake.setRotation(INTAKE_ROTACION);
+                    intake.setInnerRotation(INTAKE_ROTACION);
                     break;
 
                 default:
