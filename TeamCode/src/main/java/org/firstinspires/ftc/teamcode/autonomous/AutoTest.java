@@ -49,8 +49,8 @@ public class AutoTest extends LinearOpMode {
                 .strafeToConstantHeading(new Vector2d(51.99, -14.23))
                 .strafeToConstantHeading(new Vector2d(51.99, -60.16))
                 .strafeToConstantHeading(new Vector2d(51.99, -9.17))
-                .strafeToConstantHeading(new Vector2d(58.9, -9.32))
-                .strafeToConstantHeading(new Vector2d(58.9, -54.81))
+                .strafeToConstantHeading(new Vector2d(60.9, -9.32))
+                .strafeToConstantHeading(new Vector2d(60.9, -54.81))
                 .strafeToConstantHeading(new Vector2d(55.9, -50.81))
                 .waitSeconds(1)
                 .strafeToConstantHeading(new Vector2d(36.32, -64.90));

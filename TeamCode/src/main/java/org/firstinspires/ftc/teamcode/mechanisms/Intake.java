@@ -57,7 +57,7 @@ public class Intake {
 
         controller = new PIDController(p,i,d);
         sliderMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sliderMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 //        sliderLeft.setPosition(0);
 //        sliderRight.setPosition(0);
@@ -80,6 +80,10 @@ public class Intake {
     public void setRotation(double position){
         rotationLeft.setPosition(position);
         rotationRight.setPosition(position);
+    }
+
+    public void setPower(double power){
+        sliderMotor.setPower(power);
     }
 
     public void setInnerRotation(double position){

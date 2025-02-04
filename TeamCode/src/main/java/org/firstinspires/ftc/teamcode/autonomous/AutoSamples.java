@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Outtake;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp;
 
-@Autonomous(name = "F O R T N I T E")
+@Autonomous(name = "UIA")
 public class AutoSamples extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -109,10 +109,9 @@ public class AutoSamples extends LinearOpMode {
                                                 intake.setInnerRotationAction(TeleOp.ROT_IN_PREINTAKE)
                                         )
                                 ),
-                                new SleepAction(0.5,)
+                                new SleepAction(0.5),
                                 intake.setMunecaAction(TeleOp.MUNECA_I_HOR),
                                 intake.setGarraAction(TeleOp.GARRA_ABIERTA_I),
-                                 e
 
                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING)
 //                                new SleepAction(0.2),

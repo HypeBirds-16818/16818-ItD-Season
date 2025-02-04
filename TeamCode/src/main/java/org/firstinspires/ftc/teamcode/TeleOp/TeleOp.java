@@ -236,14 +236,7 @@ public class TeleOp extends LinearOpMode {
                         intake.setTarget(targetIntake + 50);
                         flag2 = true;
                     }
-                    if(gamepad1.dpad_right){
-                        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                        flag2 = true;
-                    }
-                    if(gamepad1.dpad_left){
-                        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                        flag2 = true;
-                    }
+
                     if(gamepad1.dpad_down){
                         intake.setTarget(targetIntake - 50);
                         flag2 = true;
@@ -645,7 +638,7 @@ public class TeleOp extends LinearOpMode {
 
             drive.updatePoseEstimate();
             climber.updatePID(targetOutake);
-            intake.updatePID();
+            //intake.updatePID();
 
             telemetry.addData("current state: ", state);
             telemetry.addData("Climber unlocked: ", nuke);
