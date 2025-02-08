@@ -19,6 +19,9 @@ import org.firstinspires.ftc.teamcode.TeleOp.TeleOp;
 
 @Autonomous(name = "SkibidiSigmaPomni")
 public class AutoTest extends LinearOpMode {
+
+    public double armRaiseTime = 2;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -37,47 +40,49 @@ public class AutoTest extends LinearOpMode {
                 .strafeTo(new Vector2d(8.74, -58.90));
 
         TrajectoryActionBuilder driveToFirstSample = moveCentimeter.endTrajectory().fresh()
-                .strafeTo(new Vector2d(1.95, -31.73));
+                .strafeTo(new Vector2d(1, -31.73));
 
 
         TrajectoryActionBuilder moveAllSamples = driveToFirstSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(31.70, -62.90))
-                .strafeToConstantHeading(new Vector2d(36.76, -13.65))
-                .strafeToConstantHeading(new Vector2d(46.60, -13.94))
-                .strafeToConstantHeading(new Vector2d(46.75, -60.45))
-                .strafeToConstantHeading(new Vector2d(46.60, -9.17))
-                .strafeToConstantHeading(new Vector2d(51.99, -14.23))
-                .strafeToConstantHeading(new Vector2d(51.99, -60.16))
-                .strafeToConstantHeading(new Vector2d(51.99, -9.17))
-                .strafeToConstantHeading(new Vector2d(60.9, -9.32))
-                .strafeToConstantHeading(new Vector2d(60.9, -54.81))
-                .strafeToConstantHeading(new Vector2d(55.9, -50.81))
-                .waitSeconds(1)
-                .strafeToConstantHeading(new Vector2d(36.32, -64.90));
+                .setReversed(false)
+                .splineTo(new Vector2d(36.76, -24.19), Math.toRadians(270.00))
+                .setReversed(true)
+                .strafeToConstantHeading(new Vector2d(36.76, -13)) // start moving
+                .strafeToConstantHeading(new Vector2d(46.60, -13))
+                .strafeToConstantHeading(new Vector2d(46.60, -60.5))
+                .strafeToConstantHeading(new Vector2d(46.60, -13))
+                .strafeToConstantHeading(new Vector2d(51.99, -13))
+                .strafeToConstantHeading(new Vector2d(51.99, -60.5))
+                .strafeToConstantHeading(new Vector2d(51.99, -13))
+                .strafeToConstantHeading(new Vector2d(60.9, -13))
+                .strafeToConstantHeading(new Vector2d(60.9, -60))
+                .strafeToConstantHeading(new Vector2d(55.9, -50))
+                .waitSeconds(0.5)
+                .strafeToConstantHeading(new Vector2d(40, -64.90));
 
         TrajectoryActionBuilder driveToSecondSample = moveAllSamples.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(3.83, -32.29));
+                .strafeToConstantHeading(new Vector2d(9, -31.7));
 
         TrajectoryActionBuilder firstReturn = driveToSecondSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(36.60, -61.17));
+                .strafeToConstantHeading(new Vector2d(36.60, -64));
 
         TrajectoryActionBuilder driveToThirdSample = firstReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(1.83, -33.29));
+                .strafeToConstantHeading(new Vector2d(7, -31.7));
 
         TrajectoryActionBuilder secondReturn = driveToThirdSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(36.60, -61.17));
+                .strafeToConstantHeading(new Vector2d(36.60, -64));
 
         TrajectoryActionBuilder driveToFourthSample = secondReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(-0.83, -33.29));
+                .strafeToConstantHeading(new Vector2d(5, -31.7));
 
         TrajectoryActionBuilder thirdReturn = driveToFourthSample.endTrajectory().fresh()
-                .splineToConstantHeading(new Vector2d(36.60, -61.17), Math.toRadians(270.00));
+                .strafeToConstantHeading(new Vector2d(36.60, -64));
 
         TrajectoryActionBuilder driveToFifthSample = thirdReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(-2.83, -33.29));
+                .strafeToConstantHeading(new Vector2d(3, -31.7));
 
         TrajectoryActionBuilder fourthReturn = driveToFifthSample.endTrajectory().fresh()
-                .splineToConstantHeading(new Vector2d(36.60, -61.17), Math.toRadians(270.00));
+                .strafeToConstantHeading(new Vector2d(36.60, -64));
 
 
 
@@ -93,7 +98,7 @@ public class AutoTest extends LinearOpMode {
                                 new SleepAction(0.7),
                         //INIT
                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN-0.2),
-                                new SleepAction(0.6),
+                                new SleepAction(0.3),
                                 outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
                                 outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
@@ -104,10 +109,9 @@ public class AutoTest extends LinearOpMode {
 
                                 // SPECIMEN OUTAKE
                                 new SleepAction(0.5),
-                                climber.setTarget(100),
                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
-                                new SleepAction(2),
+                                new SleepAction(armRaiseTime),
                                 outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
                                 new SleepAction(0.2),
                                 climber.setTarget(5),
@@ -143,7 +147,7 @@ public class AutoTest extends LinearOpMode {
 //                                        new SequentialAction(
 //                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
 //                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
-//                                                new SleepAction(2),
+//                                                new SleepAction(armRaiseTime),
 //                                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
 //                                                new SleepAction(0.2),
 //                                                climber.setTarget(5)
@@ -174,7 +178,7 @@ public class AutoTest extends LinearOpMode {
 //                                        new SequentialAction(
 //                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
 //                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
-//                                                new SleepAction(2),
+//                                                new SleepAction(armRaiseTime),
 //                                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
 //                                                new SleepAction(0.2),
 //                                                climber.setTarget(5)
@@ -205,7 +209,7 @@ public class AutoTest extends LinearOpMode {
 //                                        new SequentialAction(
 //                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
 //                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
-//                                                new SleepAction(1),
+//                                                new SleepAction(armRaiseTime),
 //                                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
 //                                                new SleepAction(0.2),
 //                                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY)
@@ -236,7 +240,7 @@ public class AutoTest extends LinearOpMode {
 //                                        new SequentialAction(
 //                                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
 //                                                outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
-//                                                new SleepAction(1),
+//                                                new SleepAction(armRaiseTime),
 //                                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
 //                                                new SleepAction(0.2),
 //                                                climber.setTarget(TeleOp.CLIMBER_SLIGHTLY)
