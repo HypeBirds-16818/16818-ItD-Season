@@ -48,7 +48,7 @@ public class TeleOp extends LinearOpMode {
 
     // ROTACION INTERNA OUTAKE (THEORIZED)
     public static double ROT_OUT_START = 0.22; // 0° REF
-    public static double ROT_OUT_OTTAKE = 0.25; // 45°
+    public static double ROT_OUT_OTTAKE = 0.31; // 45°
     public static double ROT_OUT_TRANSFER = 0.6; // 135°
     public static double ROT_OUT_OTLEAVE = 0.55; // ?
     public static double ROT_OUT_PRETAKE = 0.75; // 180°
@@ -61,8 +61,8 @@ public class TeleOp extends LinearOpMode {
     public static int CLIMBER_RUNG = 2100;
 
     // BRAZO OUTAKE (THEORIZED)
-    public static double BRAZO_OUT_IDLE = 0.95; // ~30° 0 REF
-    public static double BRAZO_OUT_SPECIMEN = 0.92; // ~35° 5
+    public static double BRAZO_OUT_IDLE = 0.85; // ~30° 0 REF
+    public static double BRAZO_OUT_SPECIMEN = 1; // ~35° 5
     public static double BRAZO_OUT_PREINTAKE = 0.75; // ~95° 65
     public static double BRAZO_OUT_TRANSFER = 0.81; // ~85° 55
     public static double BRAZO_OUT_SCORING = 0.21; // ~225° 195
@@ -93,7 +93,7 @@ public class TeleOp extends LinearOpMode {
 
     // MUÑECAS (OFFSETS < 0.15) (THEORIZED)
     public static double MUNECA_O_VER = 0;
-    public static double MUNECA_O_HOR = 0.18;
+    public static double MUNECA_O_HOR = 0.19;
     public static double MUNECA_O_FLIPPED = -0.18;
     public static double MUNECA_I_VER = 0;
     public static double MUNECA_I_HOR = 0;
@@ -135,13 +135,13 @@ public class TeleOp extends LinearOpMode {
 
             double heading = drive.lazyImu.get().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-            if(gamepad1.options){
+            if (gamepad1.options) {
                 drive.lazyImu.get().resetYaw();
             }
 
             drive.setDrivePowers(new PoseVelocity2d(new Vector2d(
-                    Math.cos(-heading)*-gamepad1.left_stick_y * velocity - Math.sin(-heading)*-gamepad1.left_stick_x * velocity_lat,
-                    Math.sin(-heading)*-gamepad1.left_stick_y * velocity + Math.cos(-heading)*-gamepad1.left_stick_x * velocity_lat
+                    Math.cos(-heading) * -gamepad1.left_stick_y * velocity - Math.sin(-heading) * -gamepad1.left_stick_x * velocity_lat,
+                    Math.sin(-heading) * -gamepad1.left_stick_y * velocity + Math.cos(-heading) * -gamepad1.left_stick_x * velocity_lat
             ),
                     -gamepad1.right_stick_x
             ));
@@ -152,7 +152,7 @@ public class TeleOp extends LinearOpMode {
 //                    )
 //            );
 
-            switch(robotState){
+            switch (robotState) {
                 case PRE_IDLE:
                     state = "PRE_IDLE";
                     outake.setRotation(BRAZO_OUT_IDLE);
@@ -172,24 +172,24 @@ public class TeleOp extends LinearOpMode {
                     break;
 
                 case IDLE:
-                    if(timer.milliseconds() < 100){
+                    if (timer.milliseconds() < 100) {
                         gamepad1.rumble(200);
                         outake.setMuneca(MUNECA_O_HOR);
                         intake.setMuneca(MUNECA_I_HOR);
                     }
-                    if(timer.seconds() < 1){
+                    if (timer.seconds() < 1) {
                         flag = false;
                         flag2 = false;
                         state = "IDLE";
 
-                        if(timer.milliseconds() > 500 && timer.milliseconds() < 900){
+                        if (timer.milliseconds() > 500 && timer.milliseconds() < 900) {
                             // servos de outake en posicion inicial
                             outake.setRotation(BRAZO_OUT_IDLE);
                             outake.setGarra(GARRA_ABIERTA_O);
                             outake.setInnerRotation(ROT_OUT_START);
                         }
 
-                        if(timer.milliseconds() > 100 && timer.milliseconds() < 500 ){
+                        if (timer.milliseconds() > 100 && timer.milliseconds() < 500) {
                             // servos de intake en posicion inicial
                             //intake.setSliders(SLIDER_I_IN);
                             intake.setTarget(-100);
@@ -199,24 +199,23 @@ public class TeleOp extends LinearOpMode {
                         }
 
 
-
                     }
 
-                    if(timer.milliseconds() > 900 && timer.milliseconds() < 1000){
+                    if (timer.milliseconds() > 900 && timer.milliseconds() < 1000) {
                         intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         intake.setTarget(0);
                     }
 
-                    if(timer.seconds() > 1){
-                        if(!nuke){
+                    if (timer.seconds() > 1) {
+                        if (!nuke) {
                             targetOutake = 20;
                         }
 
-                        if(gamepad1.a){
+                        if (gamepad1.a) {
                             robotState = RobotState.INTAKING;
                             timer.reset();
                         }
-                        if(gamepad1.x){
+                        if (gamepad1.x) {
                             robotState = RobotState.SPECIMING;
                             timer.reset();
                         }
@@ -226,15 +225,15 @@ public class TeleOp extends LinearOpMode {
 
                 case INTAKING:
                     state = "INTAKING";
-                    if(timer.milliseconds() < 300){
+                    if (timer.milliseconds() < 300) {
                         intake.setMuneca(MUNECA_I_HOR);
                     }
-                    if(timer.milliseconds() < 500 && timer.milliseconds() > 50){
+                    if (timer.milliseconds() < 500 && timer.milliseconds() > 50) {
                         outake.setRotation(BRAZO_OUT_PREINTAKE);
                         outake.setInnerRotationAction(ROT_OUT_PRETAKE);
                         outake.setGarra(GARRA_ABIERTA_O);
                     }
-                    if(timer.milliseconds() > 500){
+                    if (timer.milliseconds() > 500) {
                         intake.setRotation(BRAZO_IN_PREINTAKE);
                         intake.setGarra(GARRA_ABIERTA_I);
                         intake.setInnerRotation(ROT_IN_PREINTAKE);
@@ -242,43 +241,40 @@ public class TeleOp extends LinearOpMode {
                         flag = true;
                     }
 
-                    if(gamepad1.dpad_up){
+                    if (gamepad1.dpad_up) {
                         intake.setTarget(targetIntake + 50);
                         flag2 = true;
                     }
 
-                    if(gamepad1.dpad_down){
+                    if (gamepad1.dpad_down) {
                         intake.setTarget(targetIntake - 50);
                         flag2 = true;
                     }
 
-                    if(gamepad1.dpad_right && flag && offsetMuneca != 0.15 && cd.milliseconds() > 200){
+                    if (gamepad1.dpad_right && flag && offsetMuneca != 0.15 && cd.milliseconds() > 200) {
                         offsetMuneca = offsetMuneca + 0.025;
                         intake.setMuneca(offsetMuneca);
                         cd.reset();
                     }
-                    if(gamepad1.dpad_left && flag && offsetMuneca != 0 && cd.milliseconds() > 200){
+                    if (gamepad1.dpad_left && flag && offsetMuneca != 0 && cd.milliseconds() > 200) {
                         offsetMuneca = offsetMuneca - 0.025;
                         intake.setMuneca(offsetMuneca);
                         cd.reset();
                     }
 
-                    if((gamepad1.a && flag2)){
+                    if ((gamepad1.a && flag2)) {
                         robotState = RobotState.CLOSE_INTAKE;
                         timer.reset();
                     }
-                    if((gamepad1.b && flag2)){
+                    if ((gamepad1.b && flag2)) {
                         robotState = RobotState.IDLE;
                         timer.reset();
                     }
-                    if(/* Limelight detected a sample */){
-                        gamepad1.rumble(100);
-                        if(gamepad1.x){
-                            //get angle
-                        }
-                    }
+//
+
 
                     break;
+
 
                 case CLOSE_INTAKE:
                     state = "CLOSE_INTAKE";
