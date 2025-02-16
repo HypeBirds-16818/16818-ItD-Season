@@ -42,7 +42,6 @@ public class Intake {
 
     public Intake(HardwareMap hardwareMap){
 
-
     }
 
     public void init(HardwareMap hardwareMap){
@@ -138,11 +137,11 @@ public class Intake {
         return sliderMotor.getCurrentPosition();
     }
 
-    public void updatePID(){
+    public void updatePID(int tTarget){
         controller.setPID(p,i,d);
         int slidepos = sliderMotor.getCurrentPosition();
 
-        double pid = controller.calculate(slidepos, target);
+        double pid = controller.calculate(slidepos, tTarget);
         double power = pid;
 
         sliderMotor.setPower(power);
