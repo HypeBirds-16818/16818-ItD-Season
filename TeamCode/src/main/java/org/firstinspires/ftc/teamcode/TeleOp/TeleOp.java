@@ -301,10 +301,7 @@ public class TeleOp extends LinearOpMode {
                         timer.reset();
                     }
 //
-
-
                     break;
-
 
                 case CLOSE_INTAKE:
                     state = "CLOSE_INTAKE";
@@ -398,8 +395,14 @@ public class TeleOp extends LinearOpMode {
                     }
 
                     if(timer.seconds() > 2){
-                        robotState = RobotState.IDLE;
-                        timer.reset();
+                        if(gamepad1.b){
+                            robotState = RobotState.IDLE;
+                            timer.reset();
+                        }
+                        if(gamepad1.y){
+                            robotState = RobotState.INTAKING;
+                            timer.reset();
+                        }
                     }
                     break;
 
@@ -570,13 +573,6 @@ public class TeleOp extends LinearOpMode {
                         targetOutake = 20;
                     }
 
-                    if(gamepad2.dpad_up){
-                        targetOutake = targetOutake + 2;
-                    }
-                    if(gamepad2.dpad_down){
-                        targetOutake = targetOutake - 2;
-                    }
-
                     if(gamepad1.a && cd.milliseconds() > 200){
                         if(openS){
                             outake.setGarra(GARRA_CERRADA_O);
@@ -717,27 +713,41 @@ public class TeleOp extends LinearOpMode {
                 targetOutake = 1800;
             }
 
-            if (gamepad1.dpad_up && globalCd.milliseconds() > 80 && targetIntake < 250) {
+            if ((gamepad1.dpad_up || gamepad2.dpad_up) && globalCd.milliseconds() > 80 && targetIntake < 250 && !nuke) {
                 targetIntake = targetIntake + 50;
                 flag2 = true;
                 globalCd.reset();
             }
 
-            if (gamepad1.dpad_down && globalCd.milliseconds() > 80 && targetIntake > -100) {
+            if ((gamepad1.dpad_down || gamepad2.dpad_down) && globalCd.milliseconds() > 80 && targetIntake > -100 && !nuke) {
                 targetIntake = targetIntake - 50;
                 flag2 = true;
                 globalCd.reset();
             }
 
-            if (gamepad1.share){
+            if (gamepad1.share || gamepad2.share) {
                 intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 targetIntake = 0;
             }
 
+            if(targetIntake < 0){
+                gamepad1.rumble(200);
+                gamepad2.rumble(200);
+            }
+
+            if(gamepad2.right_trigger > 0.2){
+                targetOutake = targetOutake + (int) (gamepad2.right_trigger * 5);
+            }
+            if(gamepad2.left_trigger > 0.2){
+                targetOutake = targetOutake - (int) (gamepad2.left_trigger * 5);
+            }
+
             drive.updatePoseEstimate();
             climber.updatePID(targetOutake);
             intake.updatePID(targetIntake);
+
+
 
             telemetry.addData("current state: ", state);
             telemetry.addData("Climber unlocked: ", nuke);
