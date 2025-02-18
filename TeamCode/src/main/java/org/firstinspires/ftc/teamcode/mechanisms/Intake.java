@@ -165,6 +165,17 @@ public class Intake {
         };
     }
 
+    public Action setModeAction(DcMotor.RunMode runMode){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                sliderMotor.setMode(runMode);
+                return false;
+            }
+        };
+
+    }
+
     public void setTarget(int newTarget){
         target = newTarget;
     }

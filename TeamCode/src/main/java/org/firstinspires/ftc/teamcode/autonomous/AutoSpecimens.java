@@ -10,6 +10,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.mechanisms.Climber;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
@@ -43,22 +44,29 @@ public class AutoSpecimens extends LinearOpMode {
                 .strafeTo(new Vector2d(1, -31.73));
 
 
-        TrajectoryActionBuilder moveAllSamples = driveToFirstSample.endTrajectory().fresh()
+        TrajectoryActionBuilder positionToMove = driveToFirstSample.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(1,-40.73))
-                .strafeToConstantHeading(new Vector2d(36.76, -42.59))
-                .strafeToConstantHeading(new Vector2d(36.76, -13)) // start moving
-                .strafeToConstantHeading(new Vector2d(46.60, -13))
-                .strafeToConstantHeading(new Vector2d(46.60, -60.5))
-                .strafeToConstantHeading(new Vector2d(46.60, -13))
-                .strafeToConstantHeading(new Vector2d(51.99, -13))
-                .strafeToConstantHeading(new Vector2d(51.99, -60.5))
-                .strafeToConstantHeading(new Vector2d(51.99, -13))
-                .strafeToConstantHeading(new Vector2d(60.9, -13))
-                .strafeToConstantHeading(new Vector2d(60.9, -60))
-                .strafeToConstantHeading(new Vector2d(55.9, -50))
-                .strafeToConstantHeading(new Vector2d(40, -64.90));
+                .strafeToLinearHeading(new Vector2d(29, -40.73), Math.toRadians(50));
 
-        TrajectoryActionBuilder driveToSecondSample = moveAllSamples.endTrajectory().fresh()
+        TrajectoryActionBuilder moveFirst = positionToMove.endTrajectory().fresh()
+                .turnTo(Math.toRadians(-40));
+
+        TrajectoryActionBuilder planSecond = moveFirst.endTrajectory().fresh()
+                .strafeToLinearHeading(new Vector2d(40,-40), Math.toRadians(50));
+
+        TrajectoryActionBuilder moveSecond = planSecond.endTrajectory().fresh()
+                .turnTo(Math.toRadians(-40));
+
+        TrajectoryActionBuilder planThird = moveSecond.endTrajectory().fresh()
+                .strafeToLinearHeading(new Vector2d(52,-40), Math.toRadians(50));
+
+        TrajectoryActionBuilder moveThird = planThird.endTrajectory().fresh()
+                .turn(Math.toRadians(-40));
+
+        TrajectoryActionBuilder setForSecondSample = moveThird.endTrajectory().fresh()
+                .strafeToLinearHeading(new Vector2d(40, -64.90), Math.toRadians(270));
+
+        TrajectoryActionBuilder driveToSecondSample = setForSecondSample.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(5, -31.7));
 
         TrajectoryActionBuilder firstReturn = driveToSecondSample.endTrajectory().fresh()
@@ -89,7 +97,7 @@ public class AutoSpecimens extends LinearOpMode {
         waitForStart();
 
 
-        Actions.runBlocking(new SequentialAction(climber.setTarget(30), intake.setTargetAction(-40),
+        Actions.runBlocking(new SequentialAction(climber.setTarget(30), intake.setTargetAction(0),
                 new ParallelAction(
                         climber.updatePIDAction(),
                         intake.updatePIDAction(),
@@ -112,7 +120,7 @@ public class AutoSpecimens extends LinearOpMode {
 
                                 // INIT OUTAKE TO MOVE SAMPLES IN FLOOR
                                 new ParallelAction(
-                                        moveAllSamples.build(),
+                                        positionToMove.build(),
                                         new SequentialAction(
                                                 new SleepAction(1),
                                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
@@ -121,6 +129,22 @@ public class AutoSpecimens extends LinearOpMode {
                                         )
                                 ),
                                 new SleepAction(0.2),
+                                intake.setTargetAction(250),
+                                new SleepAction(0.5),
+                                moveFirst.build(),
+                                planSecond.build(),
+                                moveSecond.build(),
+                                planThird.build(),
+                                moveThird.build(),
+                                intake.setTargetAction(-100),
+                                intake.setModeAction(DcMotor.RunMode.STOP_AND_RESET_ENCODER),
+                                intake.setModeAction(DcMotor.RunMode.RUN_USING_ENCODER),
+                                setForSecondSample.build(),
+                                new SleepAction(10),
+
+
+
+
                                 // CLOSE CLAW
                                 outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
                                 new SleepAction(0.4),
