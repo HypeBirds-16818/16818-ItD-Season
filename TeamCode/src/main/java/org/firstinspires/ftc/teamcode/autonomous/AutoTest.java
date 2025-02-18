@@ -56,7 +56,7 @@ public class AutoTest extends LinearOpMode {
 //                .strafeToConstantHeading(new Vector2d(60.9, -13))
 //                .strafeToConstantHeading(new Vector2d(60.9, -60))
 //                .strafeToConstantHeading(new Vector2d(55.9, -50))
-                .strafeToConstantHeading(new Vector2d(40, -64.90));
+                .strafeToConstantHeading(new Vector2d(36.6, -64.90));
 
         TrajectoryActionBuilder driveToSecondSample = moveAllSamples.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(5, -31.7));
