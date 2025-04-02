@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.autonomous;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -20,7 +22,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.TeleOp;
 @Autonomous(name = "SkibidiSigmaPomni")
 public class AutoTest extends LinearOpMode {
 
-    public double armRaiseTime = 0.8;
+    public double armRaiseTime = 0.7;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -40,18 +42,18 @@ public class AutoTest extends LinearOpMode {
                 .strafeTo(new Vector2d(8.74, -58.90));
 
         TrajectoryActionBuilder driveToFirstSample = drive.actionBuilder(initialPose)
-                .strafeTo(new Vector2d(1, -31.73));
-
+                .strafeTo(new Vector2d(1, -27.73));
 
         TrajectoryActionBuilder moveAllSamples = driveToFirstSample.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(1,-40.73))
                 .strafeToConstantHeading(new Vector2d(36.76, -42.59))
-                .strafeToConstantHeading(new Vector2d(36.76, -13)) // start moving
-                .strafeToConstantHeading(new Vector2d(46.60, -13))
-                .strafeToConstantHeading(new Vector2d(46.60, -60.5))
-                .strafeToConstantHeading(new Vector2d(46.60, -13))
-                .strafeToConstantHeading(new Vector2d(51.99, -13))
-                .strafeToConstantHeading(new Vector2d(51.99, -60.5))
+                .strafeToConstantHeading(new Vector2d(36.76, -14),new TranslationalVelConstraint(100),new ProfileAccelConstraint(-60,90)) // start moving
+                .strafeToConstantHeading(new Vector2d(46.60, -14),new TranslationalVelConstraint(100),new ProfileAccelConstraint(-60,90))
+                .strafeToConstantHeading(new Vector2d(46.60, -58.5),new TranslationalVelConstraint(100),new ProfileAccelConstraint(-60,90))
+                .strafeToConstantHeading(new Vector2d(46.60, -14),new TranslationalVelConstraint(100),new ProfileAccelConstraint(-60,90))
+                .strafeToConstantHeading(new Vector2d(53.99, -14),new TranslationalVelConstraint(100),new ProfileAccelConstraint(-60,90))
+                .strafeToConstantHeading(new Vector2d(5.99, -58.5),new TranslationalVelConstraint(100),new ProfileAccelConstraint(-60,90))
+                .strafeToConstantHeading(new Vector2d(36.6, -58.5))
 //                .strafeToConstantHeading(new Vector2d(51.99, -13))
 //                .strafeToConstantHeading(new Vector2d(60.9, -13))
 //                .strafeToConstantHeading(new Vector2d(60.9, -60))
@@ -59,50 +61,57 @@ public class AutoTest extends LinearOpMode {
                 .strafeToConstantHeading(new Vector2d(36.6, -64.90));
 
         TrajectoryActionBuilder driveToSecondSample = moveAllSamples.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(5, -31.7));
+                .strafeToConstantHeading(new Vector2d(-5, -27.7));
 
         TrajectoryActionBuilder firstReturn = driveToSecondSample.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(5,-40))
-                .strafeToConstantHeading(new Vector2d(36.60, -64));
+                .strafeToConstantHeading(new Vector2d(36.6, -58.5))
+//
+                .strafeToConstantHeading(new Vector2d(36.6, -63.0));
 
         TrajectoryActionBuilder driveToThirdSample = firstReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(3, -31.7));
+                .strafeToConstantHeading(new Vector2d(-3, -26.7));
 
         TrajectoryActionBuilder secondReturn = driveToThirdSample.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(3,-40))
-                .strafeToConstantHeading(new Vector2d(36.60, -64));
+                .strafeToConstantHeading(new Vector2d(36.6, -58.5))
+//
+                .strafeToConstantHeading(new Vector2d(36.6, -63.70));
 
         TrajectoryActionBuilder driveToFourthSample = secondReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(5, -31.7));
+                .strafeToConstantHeading(new Vector2d(-1, -25.7));
 
         TrajectoryActionBuilder thirdReturn = driveToFourthSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(36.60, -64));
+                .strafeToConstantHeading(new Vector2d(3,-40))
+                .strafeToConstantHeading(new Vector2d(36.6, -57.5))
+//
+                .strafeToConstantHeading(new Vector2d(36.6, -63.70));
 
         TrajectoryActionBuilder driveToFifthSample = thirdReturn.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(3, -31.7));
+                .strafeToConstantHeading(new Vector2d(3, -27.7));
 
         TrajectoryActionBuilder fourthReturn = driveToFifthSample.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(36.60, -64));
+                .strafeToConstantHeading(new Vector2d(36.60, -63.5));
 
 
 
         waitForStart();
 
 
-        Actions.runBlocking(new SequentialAction(climber.setTarget(30), intake.setTargetAction(-40),
+        Actions.runBlocking(new SequentialAction(climber.setTarget(30), intake.setTargetAction(-20),
                 new ParallelAction(
                         climber.updatePIDAction(),
                                 intake.updatePIDAction(),
                         new SequentialAction(
-//                                moveCentimeter.build(),
 
                                 // SPECIMEN OUTAKE
-                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING-0.03),
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTLEAVE),
                                 new SleepAction(armRaiseTime),
-                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
+
                                 new SleepAction(0.2),
                                 climber.setTarget(5),
+                                outake.setMunecaAction(TeleOp.MUNECA_O_FLIPPED),
 
                                 // MOVE TO FIRST SAMPLE
                                 driveToFirstSample.build(),
@@ -142,13 +151,15 @@ public class AutoTest extends LinearOpMode {
                                 ),
                                 new SleepAction(0.3),
                                 outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+                                new SleepAction(0.3),
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING-0.08),
 
                                 // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
                                 new ParallelAction(
                                         firstReturn.build(),
                                         new SequentialAction(
                                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
-                                                new SleepAction(0.5),
+                                                new SleepAction(0.4),
                                                 outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
                                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN)
                                         )
@@ -175,13 +186,15 @@ public class AutoTest extends LinearOpMode {
                                 ),
                                 new SleepAction(0.4),
                                 outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+                                new SleepAction(0.3),
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING-0.08),
 
                                 // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
                                 new ParallelAction(
                                         secondReturn.build(),
                                         new SequentialAction(
                                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
-                                                new SleepAction(0.5),
+                                                new SleepAction(0.4),
                                                 outake.setMunecaAction(TeleOp.MUNECA_O_HOR),
                                                 outake.setRotationAction(TeleOp.BRAZO_OUT_SPECIMEN)
                                         )
@@ -206,13 +219,19 @@ public class AutoTest extends LinearOpMode {
                                                 climber.setTarget(5)
                                         )
                                 ),
-                                new SleepAction(0.4),
+                                new SleepAction(0.2),
                                 outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
+                                new SleepAction(0.3),
+                                outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING-0.08),
 
                                 // RETURN FOR ANOTHER SAMPLE WHILE RESETING OUTAKE
                                 new ParallelAction(
                                         thirdReturn.build(),
                                         new SequentialAction(
+                                                intake.setRotationAction(TeleOp.BRAZO_IN_IDLE),
+                                                intake.setGarraAction(TeleOp.GARRA_ABIERTA_I),
+                                                intake.setInnerRotationAction(TeleOp.ROT_IN_DOWN),
+                                                intake.setTargetAction(350),
                                                 outake.setInnerRotationAction(TeleOp.ROT_OUT_OTTAKE),
                                                 new SleepAction(0.5),
                                                 outake.setMunecaAction(TeleOp.MUNECA_O_HOR),

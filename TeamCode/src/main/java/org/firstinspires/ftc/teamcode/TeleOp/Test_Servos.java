@@ -21,7 +21,6 @@ public class Test_Servos extends LinearOpMode {
     public static int in_rot = 0;
     public static int in_brazo = 0;
     public static int in_mun = 0;
-    public static int out_brazo_l = 0;
     public static int out_brazo_r = 0;
     public static int out_diff_l = 0;
     public static int out_diff_r = 0;
@@ -29,14 +28,12 @@ public class Test_Servos extends LinearOpMode {
     public static int out_garra = 0;
     public static int out_mun = 0;
     public static int out_inn = 0;
-    public static int in_slider = 0;
 
     public static int INTAKE_TARGET = 0;
     public static int OUTTAKE_TARGET = 0;
     public static double INTAKE_GARRA = 0;
     public static double INTAKE_ROTACION = 0;
     public static double INTAKE_BRAZO = 0;
-    public static double OUTAKE_BRAZO_L = 0;
     public static double OUTAKE_BRAZO_R = 0;
     public static double OUTAKE_ROTACION = 0;
     public static double OUTAKE_INNER = 0;
@@ -74,17 +71,10 @@ public class Test_Servos extends LinearOpMode {
 //                    )
 //            );
 
-            switch (in_slider){
-                case 1:
-                    intake.setSliders(INTAKE_SLIDER);
-                    break;
 
-                default:
-                    break;
-            }
             switch (in_brazo){
                 case 1:
-                    intake.setRotation( INTAKE_BRAZO);
+                    intake.setRotation(INTAKE_BRAZO);
                     break;
 
                 default:
@@ -122,14 +112,7 @@ public class Test_Servos extends LinearOpMode {
                 default:
                     break;
             }
-            switch (out_brazo_l){
-                case 1:
-                    outake.setRotationLeft(OUTAKE_BRAZO_L);
-                    break;
 
-                default:
-                    break;
-            }
             switch (out_brazo_r){
                 case 1:
                     outake.setRotationRight(OUTAKE_BRAZO_R);

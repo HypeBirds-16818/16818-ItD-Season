@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.Actions.DualServoAction;
 import org.firstinspires.ftc.teamcode.Actions.ServoAction;
 
 public class Outtake {
-    private Servo rotationLeft;
+
     private Servo rotationRight;
     private Servo garraOuttake;
     private Servo diffLeft;
@@ -24,7 +24,6 @@ public class Outtake {
     }
 
     public void init(HardwareMap hardwareMap){
-        rotationLeft = hardwareMap.get(Servo.class, "rotationLeftO");
         rotationRight = hardwareMap.get(Servo.class, "rotationRightO");
         garraOuttake = hardwareMap.get(Servo.class, "garraOuttake");
         diffLeft = hardwareMap.get(Servo.class, "diffLeftO");
@@ -37,15 +36,11 @@ public class Outtake {
 //        diffRight.setPosition(0);
 
         // Reverse servos that are necessary
-        rotationLeft.setDirection(Servo.Direction.REVERSE);
         diffRight.setDirection(Servo.Direction.REVERSE);
 
 
     }
 
-    public void setRotationLeft(double position){
-        rotationLeft.setPosition(position);
-    }
 
     public void setRotationRight(double position){
         rotationRight.setPosition(position);
@@ -59,7 +54,7 @@ public class Outtake {
     }
 
     public void setRotation(double position){
-        rotationLeft.setPosition(position);
+
         rotationRight.setPosition(position);
     }
 
@@ -83,7 +78,7 @@ public class Outtake {
     }
 
     public Action setRotationAction(double position){
-        return new DualServoAction(rotationLeft, rotationRight, position, position);
+        return new ServoAction(rotationRight, position);
     }
 
     public Action setInnerRotationAction(double position){

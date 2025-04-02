@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.mechanisms.Climber;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Outtake;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp;
 
+@Disabled
 @Autonomous(name = "F O R T N I T E")
 public class AutoMinerva extends LinearOpMode {
     @Override

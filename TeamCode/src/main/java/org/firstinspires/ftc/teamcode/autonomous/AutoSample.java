@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Outtake;
 import org.firstinspires.ftc.teamcode.TeleOp.TeleOp;
 
-@Autonomous
+@Autonomous(name = "SIGMA BOI")
 public class AutoSample extends LinearOpMode {
 
     public double armRaiseTime = 0.8;
@@ -25,7 +25,7 @@ public class AutoSample extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Pose2d initialPose = new Pose2d(-33.34, -62.80, Math.toRadians(90));
+        Pose2d initialPose = new Pose2d(-15, -62.80, Math.toRadians(270));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Outtake outake = new Outtake(hardwareMap);
         Intake intake = new Intake(hardwareMap);
@@ -33,6 +33,7 @@ public class AutoSample extends LinearOpMode {
 
         climber.init(hardwareMap);
         intake.init(hardwareMap);
+        outake.init(hardwareMap);
 
         TrajectoryActionBuilder scoreFirstSample = drive.actionBuilder(initialPose)
                 .strafeTo(new Vector2d(-5, -31.73));
@@ -65,8 +66,8 @@ public class AutoSample extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(climber.setTarget(30), intake.setTargetAction(-40),
                 new ParallelAction(
                         climber.updatePIDAction(),
-                        intake.updatePIDAction()
-                ),
+                        intake.updatePIDAction(),
+
                 new SequentialAction(
 //                                moveCentimeter.build(),
 
@@ -96,7 +97,7 @@ public class AutoSample extends LinearOpMode {
                                         intake.setTargetAction(250)
                                 )
                         ),
-                        new SleepAction(0.5),
+                        new SleepAction(3),
                         outake.setInnerRotationAction(TeleOp.ROT_OUT_PRETAKE),
                         outake.setRotationAction(TeleOp.BRAZO_OUT_PREINTAKE),
                         outake.setGarraAction(TeleOp.GARRA_ABIERTA_O),
@@ -108,6 +109,7 @@ public class AutoSample extends LinearOpMode {
                         intake.setGarraAction(TeleOp.GARRA_CERRADA_I),
                         intake.setRotationAction(TeleOp.BRAZO_IN_TRANSFER),
                         intake.setInnerRotationAction(TeleOp.ROT_IN_TRANSFER),
+                        outake.setRotationAction(TeleOp.BRAZO_OUT_PREINTAKE-0.07),
                         new SleepAction(0.2),
                         intake.setTargetAction(-100),
                         new SleepAction(0.5),
@@ -122,12 +124,22 @@ public class AutoSample extends LinearOpMode {
                         outake.setGarraAction(TeleOp.GARRA_CERRADA_O),
                         new SleepAction(0.3),
                         intake.setGarraAction(TeleOp.GARRA_ABIERTA_I),
-                        new SleepAction(0.3)
+                        new SleepAction(0.3),
+                        new ParallelAction(
+                                new SequentialAction(
+                                        outake.setRotationAction(TeleOp.BRAZO_OUT_SCORING),
+                                        // Poner el intake de regreso para tomar
+
+                                        outake.setInnerRotationAction(TeleOp.ROT_OUT_START),
+                                        climber.setTarget(2600)
+                                ),
+                                driveToBasketFirst.build()
+                        ),
+                        new SleepAction(0.4),
+                        outake.setGarraAction(TeleOp.GARRA_ABIERTA_O)
 
 
-
-
-        ));
+        ))));
 
 
 

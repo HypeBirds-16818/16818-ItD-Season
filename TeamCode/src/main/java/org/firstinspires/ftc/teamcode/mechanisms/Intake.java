@@ -15,8 +15,7 @@ import org.firstinspires.ftc.teamcode.Actions.DualServoAction;
 import org.firstinspires.ftc.teamcode.Actions.ServoAction;
 
 public class Intake {
-    private Servo sliderLeft;
-    private Servo sliderRight;
+
     private Servo rotationLeft;
     private Servo rotationRight;
     private Servo diffLeft;
@@ -45,8 +44,6 @@ public class Intake {
     }
 
     public void init(HardwareMap hardwareMap){
-        sliderLeft = hardwareMap.get(Servo.class, "sliderLeft");
-        sliderRight = hardwareMap.get(Servo.class, "sliderRight");
         rotationLeft = hardwareMap.get(Servo.class, "rotationLeftI");
         rotationRight = hardwareMap.get(Servo.class, "rotationRightI");
         diffLeft = hardwareMap.get(Servo.class, "diffLeftI");
@@ -67,8 +64,8 @@ public class Intake {
 
 
         // Reverse servos that are necessary
-        sliderRight.setDirection(Servo.Direction.REVERSE);
         diffRight.setDirection(Servo.Direction.REVERSE);
+        rotationRight.setDirection(Servo.Direction.REVERSE);
 
     }
 
@@ -104,10 +101,7 @@ public class Intake {
         diffRight.setPosition(diffRightPos + offset);
     }
 
-    public void setSliders(double position){
-        sliderRight.setPosition(position);
-        sliderLeft.setPosition(position);
-    }
+
 
     public Action setRotationAction(double position){
         return new DualServoAction(rotationLeft, rotationRight, position, position);
@@ -129,9 +123,6 @@ public class Intake {
         return new DualServoAction(diffLeft, diffRight, diffLeftPos - offset, diffRightPos + offset);
     }
 
-    public Action setSlidersAction(double position){
-        return new DualServoAction(sliderLeft, sliderRight, position, position);
-    }
 
     public int getIntakePosition(){
         return sliderMotor.getCurrentPosition();

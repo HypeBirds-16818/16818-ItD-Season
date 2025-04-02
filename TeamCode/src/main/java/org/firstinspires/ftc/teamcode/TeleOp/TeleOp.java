@@ -6,6 +6,9 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,6 +19,8 @@ import org.firstinspires.ftc.teamcode.mechanisms.Climber;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Outtake;
+
+import java.util.List;
 
 /*
 
@@ -83,34 +88,39 @@ public class TeleOp extends LinearOpMode {
         RESET_OUTAKE
     }
 
+    // TRANSFER OUTAKE INN 0.6 , MUN -0.16
+    // 0.78 OUTAKE INNER -0.18 OUTAKE MUN TO SCORE
+    // 0.25 OUTAKE INNER 0.16 MUN TO TRANSFER
+
+
     RobotState robotState = RobotState.PRE_IDLE;
 
     // ROTACION INTERNA OUTAKE (THEORIZED)
     public static double ROT_OUT_START = 0.22; // 0° REF
-    public static double ROT_OUT_OTTAKE = 0.43; // 45°
-    public static double ROT_OUT_TRANSFER = 0.47; // 135°
-    public static double ROT_OUT_OTLEAVE = 0.67; // ?
+    public static double ROT_OUT_OTTAKE = 0.39; // 45°
+    public static double ROT_OUT_TRANSFER = 0.8; // 135°
+    public static double ROT_OUT_OTLEAVE = 0.72; // ? 0.67
     public static double ROT_OUT_PRETAKE = 0.87; // 180°
 
     // SLIDER CLIMBER
     public static int CLIMBER_ABAJO = 20;
     public static int CLIMBER_SLIGHTLY = 20; // FOR SPECIMEN INTAKEING
-    public static int CLIMBER_F_BASKET = 1000;
-    public static int CLIMBER_S_BASKET = 3100;
+    public static int CLIMBER_F_BASKET = 2000;
+    public static int CLIMBER_S_BASKET = 3700;
     public static int CLIMBER_RUNG = 2100;
 
     // BRAZO OUTAKE (THEORIZED)
-    public static double BRAZO_OUT_IDLE = 0.85; // ~30° 0 REF
-    public static double BRAZO_OUT_SPECIMEN = 1; // ~35° 5
-    public static double BRAZO_OUT_PREINTAKE = 0.85; // ~95° 65
-    public static double BRAZO_OUT_TRANSFER = 0.95; // ~85° 55
-    public static double BRAZO_OUT_SCORING = 0.21; // ~225° 195
+    public static double BRAZO_OUT_IDLE = 0.83; // ~30° 0 REF
+    public static double BRAZO_OUT_SPECIMEN = 0.98; // ~35° 5
+    public static double BRAZO_OUT_PREINTAKE = 0.83; // ~95° 65
+    public static double BRAZO_OUT_TRANSFER = 0.77; // ~85° 55
+    public static double BRAZO_OUT_SCORING = 0.16; // ~225° 195 0.21
 
     // GARRAS
-    public static double GARRA_ABIERTA_I = 0.9;
-    public static double GARRA_CERRADA_I = 0.12;
+    public static double GARRA_ABIERTA_I = 0.85;
+    public static double GARRA_CERRADA_I = 0.44;
     public static double GARRA_ABIERTA_O = 0.9;
-    public static double GARRA_CERRADA_O = 0.54;
+    public static double GARRA_CERRADA_O = 0.50;
 
     // SLIDER INTAKE (THEORIZED)
     public static double SLIDER_I_IN = 0;
@@ -121,19 +131,19 @@ public class TeleOp extends LinearOpMode {
 
     // ROTACION INTERNA INTAKE (THEORIZED)
     public static double ROT_IN_DOWN = 0.57; // 0°
-    public static double ROT_IN_TRANSFER = 0.475; // ~10°
+    public static double ROT_IN_TRANSFER = 0.483; // ~10°
     public static double ROT_IN_PREINTAKE = 0.57; // 180°
 
     // BRAZO INTAKE (THEORIZED)
     public static double BRAZO_IN_IDLE = 0.655; // 270° 0
-    public static double BRAZO_IN_TRANSFER = 0.27; // ~135° 135
+    public static double BRAZO_IN_TRANSFER = 0.3; // ~135° 135
     public static double BRAZO_IN_PREINTAKE = 0.2; // ~120° 150
     public static double BRAZO_IN_INTAKING = 0.09; // ~90° 180
 
     // MUÑECAS (OFFSETS < 0.15) (THEORIZED)
     public static double MUNECA_O_VER = 0;
-    public static double MUNECA_O_HOR = 0.21;
-    public static double MUNECA_O_FLIPPED = -0.17;
+    public static double MUNECA_O_HOR = 0.18;
+    public static double MUNECA_O_FLIPPED = -0.16;
     public static double MUNECA_I_VER = 0;
     public static double MUNECA_I_HOR = 0;
 
@@ -151,6 +161,12 @@ public class TeleOp extends LinearOpMode {
 
     public String state = "None";
 
+    public boolean imu = false;
+    public double heading;
+    private double currentOutakeRotation;
+
+
+    private Limelight3A limelight;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -162,6 +178,11 @@ public class TeleOp extends LinearOpMode {
         ElapsedTime cd = new ElapsedTime();
         ElapsedTime globalCd = new ElapsedTime();
 
+        // Initialize Limelight sensor
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(8); // e.g., red sample pipeline
+        limelight.start();
+
         waitForStart();
         intake.init(hardwareMap);
         outake.init(hardwareMap);
@@ -172,11 +193,16 @@ public class TeleOp extends LinearOpMode {
 
         while (opModeIsActive() && !isStopRequested()) {
 
-
-            double heading = drive.lazyImu.get().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) + Math.PI;
+            if(!imu){
+                heading = drive.lazyImu.get().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) + Math.PI;
+            }
+            if(imu){
+                heading = drive.lazyImu.get().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            }
 
             if (gamepad1.options) {
                 drive.lazyImu.get().resetYaw();
+                imu = true;
             }
 
             drive.setDrivePowers(new PoseVelocity2d(new Vector2d(
@@ -196,6 +222,7 @@ public class TeleOp extends LinearOpMode {
                 case PRE_IDLE:
                     state = "PRE_IDLE";
                     outake.setRotation(BRAZO_OUT_IDLE);
+                    currentOutakeRotation = BRAZO_OUT_IDLE;
                     //outake.setMuneca(MUNECA_O_HOR);
                     outake.setGarra(GARRA_ABIERTA_O);
                     outake.setInnerRotation(ROT_OUT_START);
@@ -216,6 +243,7 @@ public class TeleOp extends LinearOpMode {
                         gamepad1.rumble(200);
                         outake.setMuneca(MUNECA_O_HOR);
                         intake.setMuneca(MUNECA_I_HOR);
+                        offsetMuneca = 0;
                     }
                     if (timer.seconds() < 1) {
                         flag = false;
@@ -225,6 +253,7 @@ public class TeleOp extends LinearOpMode {
                         if (timer.milliseconds() > 500 && timer.milliseconds() < 900) {
                             // servos de outake en posicion inicial
                             outake.setRotation(BRAZO_OUT_IDLE);
+                            currentOutakeRotation = BRAZO_OUT_IDLE;
                             outake.setGarra(GARRA_ABIERTA_O);
                             outake.setInnerRotation(ROT_OUT_START);
                         }
@@ -270,6 +299,7 @@ public class TeleOp extends LinearOpMode {
                     }
                     if (timer.milliseconds() < 500 && timer.milliseconds() > 50) {
                         outake.setRotation(BRAZO_OUT_PREINTAKE);
+                        currentOutakeRotation = BRAZO_OUT_PREINTAKE;
                         outake.setInnerRotationAction(ROT_OUT_PRETAKE);
                         outake.setGarra(GARRA_ABIERTA_O);
                     }
@@ -355,7 +385,7 @@ public class TeleOp extends LinearOpMode {
                     state = "PRE_TRANSFER";
                     if(timer.milliseconds() < 200){
 
-                        intake.setRotation(BRAZO_IN_PREINTAKE);
+                        intake.setRotation(BRAZO_IN_PREINTAKE + 0.05);
                     }
                     if(timer.milliseconds() > 200 && timer.milliseconds() < 300) {
                         // servos de intake en posicion inicial
@@ -386,6 +416,7 @@ public class TeleOp extends LinearOpMode {
                     state = "DROP";
                     if(timer.milliseconds() < 200){
                         intake.setRotation(BRAZO_IN_INTAKING);
+                        offsetMuneca = 0;
                     }
                     if(timer.milliseconds() > 200){
                         intake.setGarra(GARRA_ABIERTA_I);
@@ -413,6 +444,11 @@ public class TeleOp extends LinearOpMode {
                         // gira intake
                         intake.setRotation(BRAZO_IN_TRANSFER);
                         intake.setInnerRotation(ROT_IN_TRANSFER);
+
+                        outake.setRotation(BRAZO_OUT_PREINTAKE-0.1);
+                        outake.setInnerRotation(ROT_OUT_TRANSFER);
+                        outake.setMuneca(0.17);
+                        currentOutakeRotation = BRAZO_OUT_PREINTAKE - 0.1;
                     }
 
                     if(timer.milliseconds() > 500 && timer.milliseconds() < 600) {
@@ -443,7 +479,8 @@ public class TeleOp extends LinearOpMode {
                     }
 
                     if(timer.milliseconds() > 100 && timer.milliseconds() < 1000){
-                        outake.setRotation(BRAZO_OUT_TRANSFER);
+                        outake.setRotation(BRAZO_OUT_TRANSFER+0.05);
+                        currentOutakeRotation = BRAZO_OUT_TRANSFER+0.05;
                         outake.setInnerRotation(ROT_OUT_TRANSFER);
                         outake.setGarra(GARRA_ABIERTA_O);
                     }
@@ -455,6 +492,7 @@ public class TeleOp extends LinearOpMode {
                     }
                     if(timer.milliseconds() > 1600){
                         outake.setRotation(BRAZO_OUT_SCORING);
+                        currentOutakeRotation = BRAZO_OUT_SCORING;
 
                         intake.setRotation(BRAZO_IN_IDLE);
                         intake.setGarra(GARRA_ABIERTA_I);
@@ -521,7 +559,7 @@ public class TeleOp extends LinearOpMode {
                 case RAISE2:
                     state = "RAISE2";
                     // levantar el climber a la altura de la segunda canasta
-                    targetOutake = CLIMBER_S_BASKET-500;
+                    targetOutake = CLIMBER_S_BASKET;
 
                     if(gamepad2.left_bumper){
                         robotState = RobotState.RAISE1;
@@ -549,8 +587,10 @@ public class TeleOp extends LinearOpMode {
                     }
                     if(timer.milliseconds() > 200 && timer.milliseconds() < 300){
                         outake.setRotation(BRAZO_OUT_SPECIMEN);
+                        currentOutakeRotation = BRAZO_OUT_SPECIMEN;
                         outake.setInnerRotation(ROT_OUT_OTTAKE);
                         outake.setGarra(GARRA_ABIERTA_O);
+                        outake.setMuneca(MUNECA_O_HOR-0.02);
                     }
 
                     if(timer.milliseconds() > 300){
@@ -622,14 +662,17 @@ public class TeleOp extends LinearOpMode {
                     state = "OUTAKING_S";
                     if(timer.milliseconds() < 200){
                         outake.setRotation(BRAZO_OUT_SCORING);
+                        currentOutakeRotation = BRAZO_OUT_SCORING;
                         outake.setInnerRotation(ROT_OUT_OTLEAVE);
                         // MUNECA 180°
                     }
 
-                    if(timer.milliseconds() > 200){
+                    if(timer.milliseconds() > 200 && timer.milliseconds() < 300){
                         if(!nuke){
                             targetOutake = CLIMBER_ABAJO;
                         }
+                    }
+                    if(timer.milliseconds() > 200){
                         outake.setMuneca(MUNECA_O_FLIPPED);
                         if(gamepad2.right_bumper){
                             robotState = RobotState.DROPPING_S;
@@ -643,6 +686,7 @@ public class TeleOp extends LinearOpMode {
                     state = "DROPPING_S";
                     outake.setGarra(GARRA_ABIERTA_O);
                     outake.setRotation(0.1);
+                    currentOutakeRotation = 0.1;
 
                         if(gamepad2.a){
                             robotState = RobotState.RESET_OUTAKE;
@@ -655,10 +699,11 @@ public class TeleOp extends LinearOpMode {
                     state = "RESET_OUTAKE";
                     if(timer.seconds() < 0.4){
                         // servos de outake en posicion inicial
-                        outake.setRotation(ROT_OUT_START);
+                        outake.setRotation(BRAZO_OUT_IDLE);
+                        currentOutakeRotation = BRAZO_OUT_IDLE;
                         outake.setMuneca(MUNECA_O_HOR);
                         outake.setGarra(GARRA_ABIERTA_O);
-                        outake.setInnerRotation(BRAZO_OUT_IDLE);
+                        outake.setInnerRotation(ROT_OUT_START);
                     }
 
                     // brazo de outake default
@@ -673,6 +718,49 @@ public class TeleOp extends LinearOpMode {
                         }
                     }
                     break;
+            }
+
+            // --- Limelight integration for continuous telemetry ---
+            LLResult limelightResult = limelight.getLatestResult();
+            if (limelightResult != null && limelightResult.isValid()) {
+                for (LLResultTypes.ColorResult cr : limelightResult.getColorResults()) {
+                    List<List<Double>> targetCorners = cr.getTargetCorners();
+                    if (targetCorners.size() >= 4) {
+                        double side1 = calculateDistance(targetCorners.get(0), targetCorners.get(1));
+                        double side2 = calculateDistance(targetCorners.get(1), targetCorners.get(2));
+                        double aspectRatio = side1 / side2;
+                        double normalizedAspect = normalize(aspectRatio, (1.5 / 3.5), (3.5 / 1.5));
+                        // For telemetry, we show the computed angle (0 to 180)
+                        double computedAngle = normalizedAspect * 180;
+                        telemetry.addData("Sample Angle", computedAngle);
+                        telemetry.addData("side1", side1);
+                        telemetry.addData("side2", side2);
+                    } else {
+                        telemetry.addData("Sample", "Not enough corners");
+                    }
+                }
+            } else {
+                telemetry.addData("Limelight", "No valid data");
+            }
+
+            if (gamepad2.y && cd.milliseconds() > 200) {
+                LLResult result = limelight.getLatestResult();
+                if (result != null && result.isValid()) {
+                    for (LLResultTypes.ColorResult cr : result.getColorResults()) {
+                        List<List<Double>> targetCorners = cr.getTargetCorners();
+                        if (targetCorners.size() >= 4) {
+                            double side1 = calculateDistance(targetCorners.get(0), targetCorners.get(1));
+                            double side2 = calculateDistance(targetCorners.get(1), targetCorners.get(2));
+                            double aspectRatio = side1 / side2;
+                            double normalizedAspect = normalize(aspectRatio, (1.5 / 3.5), (3.5 / 1.5)); // 0 to 1
+                            // Map the normalized aspect to the range 0 to 0.125:
+                            offsetMuneca = normalizedAspect * 0.125;
+                            intake.setMuneca(offsetMuneca);
+                            cd.reset();
+                            break; // Only process the first valid result
+                        }
+                    }
+                }
             }
 
             if(gamepad1.left_trigger > 0.8){
@@ -715,14 +803,14 @@ public class TeleOp extends LinearOpMode {
                 targetOutake = 1800;
             }
 
-            if ((gamepad1.dpad_up || gamepad2.dpad_up) && globalCd.milliseconds() > 80 && targetIntake < 250 && !nuke) {
-                targetIntake = targetIntake + 50;
+            if ((gamepad1.dpad_up || gamepad2.dpad_up) && globalCd.milliseconds() > 80 && targetIntake < 4000 && !nuke) {
+                targetIntake = targetIntake + 1000;
                 flag2 = true;
                 globalCd.reset();
             }
 
-            if ((gamepad1.dpad_down || gamepad2.dpad_down) && globalCd.milliseconds() > 80 && targetIntake > -100 && !nuke) {
-                targetIntake = targetIntake - 50;
+            if ((gamepad1.dpad_down || gamepad2.dpad_down) && globalCd.milliseconds() > 80 && targetIntake > 0 && !nuke) {
+                targetIntake = targetIntake - 1000;
                 flag2 = true;
                 globalCd.reset();
             }
@@ -749,18 +837,43 @@ public class TeleOp extends LinearOpMode {
                 flag2 = true;
             }
 
+            if(gamepad2.options){
+                climber.setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                climber.setMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+            if(gamepad2.dpad_left){
+                currentOutakeRotation = currentOutakeRotation - 0.01;
+                outake.setRotation(currentOutakeRotation);
+            }
+            if(gamepad2.dpad_right){
+                currentOutakeRotation = currentOutakeRotation + 0.01;
+                outake.setRotation(currentOutakeRotation);
+            }
+            if(gamepad2.touchpad){
+                BRAZO_OUT_SCORING = currentOutakeRotation;
+            }
+
             drive.updatePoseEstimate();
             climber.updatePID(targetOutake);
             intake.updatePID(targetIntake);
-
-
 
             telemetry.addData("current state: ", state);
             telemetry.addData("Climber unlocked: ", nuke);
             telemetry.addData("Intake target: ", targetIntake);
             telemetry.addData("Intake position: ", intake.getIntakePosition());
             telemetry.update();
-
         }
+        limelight.stop();
+    }
+
+    public static double calculateDistance(List<Double> point1, List<Double> point2) {
+        double dx = point1.get(0) - point2.get(0);
+        double dy = point1.get(1) - point2.get(1);
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Normalize a value between a given minimum and maximum
+    public static double normalize(double value, double min, double max) {
+        return (value - min) / (max - min);
     }
 }
