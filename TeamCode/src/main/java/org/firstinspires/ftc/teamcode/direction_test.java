@@ -36,8 +36,6 @@ public class direction_test extends OpMode {
 
         int slidepos = (motor1pos + motor2pos)/2;
 
-
-
         telemetry.addData("pos 1", motor1pos);
         telemetry.addData("pos 2", motor2pos);
         telemetry.addData("pos avg", slidepos);

@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -22,6 +23,7 @@ public class Intake {
     private Servo diffRight;
     private Servo garraIntake;
     private DcMotorEx sliderMotor;
+    private DigitalChannel magneticSwitch;
 
     private PIDController controller;
 
@@ -50,7 +52,9 @@ public class Intake {
         diffRight = hardwareMap.get(Servo.class, "diffRightI");
         garraIntake = hardwareMap.get(Servo.class, "garraIntake");
         sliderMotor = hardwareMap.get(DcMotorEx.class, "sliderMotor");
+        magneticSwitch = hardwareMap.get(DigitalChannel.class, "magnetic");
 
+        magneticSwitch.setMode(DigitalChannel.Mode.INPUT);
         controller = new PIDController(p,i,d);
         sliderMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -67,6 +71,10 @@ public class Intake {
         diffRight.setDirection(Servo.Direction.REVERSE);
         rotationRight.setDirection(Servo.Direction.REVERSE);
 
+    }
+
+    public boolean checkMagnetic() {
+        return magneticSwitch.getState();
     }
 
     public void setMode(DcMotor.RunMode runMode){
@@ -88,7 +96,7 @@ public class Intake {
 
         diffLeft.setPosition(diffLeftPos - offset);
         diffRight.setPosition(diffRightPos + offset);
-}
+    }
 
     public void setGarra(double position){
         garraIntake.setPosition(position);
