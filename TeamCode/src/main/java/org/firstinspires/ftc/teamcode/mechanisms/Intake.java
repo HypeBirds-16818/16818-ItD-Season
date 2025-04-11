@@ -74,7 +74,7 @@ public class Intake {
     }
 
     public boolean checkMagnetic() {
-        return magneticSwitch.getState();
+        return !magneticSwitch.getState();
     }
 
     public void setMode(DcMotor.RunMode runMode){
